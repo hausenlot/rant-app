@@ -1,0 +1,11 @@
+<div class="explore-feed">
+  @for (post of posts(); track post.tag) {
+    <app-explore-post-card [post]="post" class="explore-feed__card" />
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-icon">🔥</div>
+      <h2>Nothing trending yet</h2>
+      <p>Trending hashtags will appear here.</p>
+    </div>
+  }
+</div>

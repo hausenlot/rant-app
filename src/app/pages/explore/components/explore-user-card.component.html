@@ -1,0 +1,13 @@
+<article class="explore-user-card">
+  <div class="explore-user-card__avatar" [style.background]="user().avatarColor" aria-hidden="true">
+    {{ user().initials }}
+  </div>
+  <div class="explore-user-card__info">
+    <span class="explore-user-card__name">{{ user().displayName }}</span>
+    <span class="explore-user-card__handle">&#64;{{ user().username }}</span>
+    @if (user().bio) {
+      <span class="explore-user-card__bio">{{ user().bio }}</span>
+    }
+  </div>
+  <button type="button" class="explore-user-card__follow-btn">Follow</button>
+</article>

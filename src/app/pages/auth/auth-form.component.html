@@ -1,0 +1,104 @@
+<div class="auth-wrap">
+
+  <!-- Left: hero column -->
+  <div class="auth-hero">
+
+    <!-- Ink bleed blobs -->
+    <svg class="auth-hero__blobs" viewBox="-100 -100 700 800" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <filter id="blob-blur-lg" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="42" />
+        </filter>
+        <filter id="blob-blur-md" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="26" />
+        </filter>
+        <filter id="blob-blur-sm" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="16" />
+        </filter>
+      </defs>
+      <!-- primary large blob — upper-left spread -->
+      <circle cx="180" cy="200" r="160" fill="#ff0080" opacity="0.14" filter="url(#blob-blur-lg)" />
+      <!-- secondary blob — lower-right -->
+      <circle cx="380" cy="410" r="130" fill="#ff0080" opacity="0.20" filter="url(#blob-blur-md)" />
+      <!-- small accent drop — upper area -->
+      <circle cx="100" cy="90" r="62" fill="#ff0080" opacity="0.10" filter="url(#blob-blur-sm)" />
+      <!-- tiny trailing drop — bottom-left -->
+      <circle cx="70" cy="510" r="40" fill="#ff0080" opacity="0.08" filter="url(#blob-blur-sm)" />
+    </svg>
+
+    <div class="auth-hero__content">
+      <span class="auth-hero__logo">Rant</span>
+      <h2 class="auth-hero__headline">
+        Lorem ipsum dolor<br>sit amet, consectetur.
+      </h2>
+      <p class="auth-hero__body">
+        Pellentesque habitant morbi tristique senectus et netus et malesuada
+        fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right: form column -->
+  <div class="auth-form-col">
+
+    <h1 class="auth-form__title">{{ title }}</h1>
+    <p class="auth-form__subtitle">{{ subtitle }}</p>
+
+    <form (ngSubmit)="onSubmit()" class="auth-form__fields">
+
+      @if (isSignUp) {
+      <div class="auth-form__group">
+        <label for="displayName" class="auth-form__label">Display name</label>
+        <input id="displayName" type="text" class="auth-form__input" placeholder="How should we call you?"
+          [(ngModel)]="displayName" name="displayName" required />
+      </div>
+
+      <div class="auth-form__group">
+        <label for="username" class="auth-form__label">Username</label>
+        <div class="auth-form__input-wrap">
+          <span class="auth-form__at">@</span>
+          <input id="username" type="text" class="auth-form__input auth-form__input--inline" placeholder="username"
+            [(ngModel)]="username" name="username" required />
+        </div>
+      </div>
+      }
+
+      <!-- Account id: on sign-up this is rendered by the sign-up block above; only
+           render the shared field for sign-in to avoid a duplicate. -->
+      @if (!isSignUp) {
+      <div class="auth-form__group">
+        <label for="username" class="auth-form__label">Username</label>
+        <div class="auth-form__input-wrap">
+          <span class="auth-form__at">@</span>
+          <input id="username" type="text" class="auth-form__input auth-form__input--inline" placeholder="username"
+            [(ngModel)]="username" name="username" autocomplete="username" required />
+        </div>
+      </div>
+      }
+
+      <div class="auth-form__group">
+        <label for="password" class="auth-form__label">Password</label>
+        <input id="password" type="password" class="auth-form__input" placeholder="••••••••" [(ngModel)]="password"
+          name="password" required />
+      </div>
+
+      <!-- Error banner: surfaces auth failures (e.g. invalid credentials). -->
+      @if (error()) {
+      <div class="auth-form__error" role="alert">
+        {{ error() }}
+      </div>
+      }
+
+      <button type="submit" class="auth-form__submit" [disabled]="loading()">
+        {{ loading() ? 'Please wait…' : ctaLabel }}
+      </button>
+
+    </form>
+
+    <p class="auth-form__switch">
+      {{ switchPrompt }}
+      <a [routerLink]="switchLink" class="auth-form__link">{{ switchLabel }}</a>
+    </p>
+  </div>
+
+</div>

@@ -1,0 +1,9 @@
+.notifications-page {
+  /* .page handles padding */
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

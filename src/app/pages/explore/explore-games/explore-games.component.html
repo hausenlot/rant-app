@@ -1,0 +1,11 @@
+<div class="explore-feed">
+  @for (topic of topics(); track topic.tag) {
+    <app-explore-topic-card [topic]="topic" class="explore-feed__card" />
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-icon">🎮</div>
+      <h2>No game topics yet</h2>
+      <p>Game-related hashtags will appear here.</p>
+    </div>
+  }
+</div>

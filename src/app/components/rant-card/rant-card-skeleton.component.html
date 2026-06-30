@@ -1,0 +1,28 @@
+@for (_ of skeletonItems; track $index) {
+  <article class="skel-card" aria-hidden="true">
+    <!-- Header: avatar + name/username -->
+    <div class="skel-card__header">
+      <div class="skel-pulse skel-card__avatar"></div>
+      <div class="skel-card__user-info">
+        <div class="skel-pulse skel-card__display-name"></div>
+        <div class="skel-pulse skel-card__username"></div>
+      </div>
+    </div>
+
+    <!-- Body: 3–4 text lines matching real rant content height -->
+    <div class="skel-card__body">
+      <div class="skel-pulse skel-card__line skel-card__line--full"></div>
+      <div class="skel-pulse skel-card__line skel-card__line--full"></div>
+      <div class="skel-pulse skel-card__line skel-card__line--mid"></div>
+      <div class="skel-pulse skel-card__line skel-card__line--short"></div>
+    </div>
+
+    <!-- Actions: 4 icon placeholders -->
+    <div class="skel-card__actions">
+      <div class="skel-pulse skel-card__action"></div>
+      <div class="skel-pulse skel-card__action"></div>
+      <div class="skel-pulse skel-card__action"></div>
+      <div class="skel-pulse skel-card__action skel-card__action--last"></div>
+    </div>
+  </article>
+}

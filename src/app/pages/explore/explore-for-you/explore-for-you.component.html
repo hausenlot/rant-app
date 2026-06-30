@@ -1,0 +1,11 @@
+<div class="explore-feed">
+  @for (user of users(); track user.username) {
+    <app-explore-user-card [user]="user" class="explore-feed__card" />
+  } @empty {
+    <div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h2>No suggestions yet</h2>
+      <p>Suggested accounts will appear here.</p>
+    </div>
+  }
+</div>

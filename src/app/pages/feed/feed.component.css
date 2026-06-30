@@ -1,0 +1,210 @@
+/* ── Feed page layout ── */
+.feed-page {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* ── Compose trigger ── */
+.feed-compose {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.feed-compose__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+}
+
+.feed-compose__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 1rem;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.feed-compose__input:disabled {
+  cursor: default;
+  color: var(--color-text-muted);
+}
+
+.feed-compose__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ── Feed rants container ── */
+.feed-rants {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-muted);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--color-text);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+/* ── Auth prompt (unauthenticated visitors) ── */
+.feed-auth-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.feed-auth-prompt p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+.feed-auth-prompt__link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 1.1rem;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.feed-auth-prompt__link:hover {
+  opacity: 0.85;
+}
+
+/* ── Refresh bar (top-of-feed pull-to-refresh indicator) ── */
+.feed-refresh-bar {
+  text-align: center;
+  padding: 0.65rem 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Error ── */
+.feed-error {
+  color: var(--color-error, #f4212e);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.feed-error__retry {
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.feed-error__retry:hover {
+  background: var(--color-surface);
+}
+
+/* ── Load more ── */
+.feed-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem 0 2rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.feed-load-more__btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.feed-load-more__btn:hover {
+  background: var(--color-surface);
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .feed-compose {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  .feed-compose__avatar {
+    width: 38px;
+    height: 38px;
+  }
+}

@@ -1,0 +1,397 @@
+/* ── Rant Card ── */
+.rant-card {
+    background: var(--color-surface, #0a0e1a);
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.10));
+    border-radius: var(--radius-lg, 12px);
+    padding: 1rem 1.25rem;
+    transition: box-shadow 0.2s ease;
+    /* CRITICAL: Force width containment */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-width: 0;
+    /* Prevent flex item from expanding */
+    flex: 1 1 auto;
+}
+
+.rant-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 255, 135, 0.05);
+}
+
+/* ── Re-rant label ── */
+.rant-card__rerant-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.rant-card__rerant-label svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+}
+
+/* ── Header ── */
+.rant-card__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.rant-card__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.rant-card__user-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.4rem;
+    min-width: 0;
+    flex: 1;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rant-card__display-name {
+    font-weight: 700;
+    color: var(--color-text, #dde4f0);
+    font-size: 0.9375rem;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rant-card__username {
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rant-card__dot {
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.rant-card__timestamp {
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.875rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ── Body ── */
+.rant-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow: hidden;
+}
+
+.rant-card__content {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-text, #dde4f0);
+    white-space: pre-wrap;
+    max-width: 100%;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ── Quote ── */
+.rant-card__quote {
+    border-left: 3px solid var(--color-border, rgba(255, 255, 255, 0.10));
+    padding: 0.5rem 0.75rem 0.5rem 1rem;
+    margin-top: 0.25rem;
+    background: var(--color-surface-2, #111828);
+    border-radius: 0 var(--radius-sm, 8px) var(--radius-sm, 8px) 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.rant-card__quote-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+    max-width: 100%;
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+
+.rant-card__quote-avatar {
+    font-weight: 600;
+    color: var(--color-text, #dde4f0);
+    font-size: 0.8125rem;
+}
+
+.rant-card__quote-timestamp {
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.75rem;
+}
+
+.rant-card__quote-content {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text, #dde4f0);
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.rant-card__quote-name {
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.8125rem;
+}
+
+.rant-card__quote-dot {
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.75rem;
+}
+
+/* ── Quote rant media ── */
+.rant-card__quote-media {
+    border-radius: var(--radius-sm, 8px);
+    overflow: hidden;
+    margin-top: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    background: var(--color-surface, #0a0e1a);
+    min-height: 80px;
+}
+
+.rant-card__quote-image {
+    width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: cover;
+    display: block;
+    border-radius: var(--radius-sm, 8px);
+    max-width: 100%;
+    transition: opacity 0.3s ease;
+}
+
+.rant-card__quote-image--loading {
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+}
+
+/* ── Media ── */
+.rant-card__media {
+    border-radius: var(--radius-md, 10px);
+    overflow: hidden;
+    margin-top: 0.25rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    background: var(--color-surface-2, #111828);
+    min-height: 120px;
+}
+
+.rant-card__media-loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 2rem 0;
+}
+
+.rant-card__media-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-text-muted, #3d4f6e);
+    animation: dot-bounce 1.2s ease-in-out infinite;
+}
+
+.rant-card__media-dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.rant-card__media-dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes dot-bounce {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    40% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+.rant-card__image {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+    display: block;
+    border-radius: var(--radius-md, 10px);
+    max-width: 100%;
+    transition: opacity 0.3s ease;
+}
+
+.rant-card__image--loading {
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+}
+
+/* ── Actions ── */
+.rant-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.10));
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.rant-card__action {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted, #3d4f6e);
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-full, 9999px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    min-width: 32px;
+    flex-shrink: 0;
+}
+
+.rant-card__action:hover {
+    background: rgba(0, 255, 135, 0.08);
+    color: var(--color-primary, #00ff87);
+}
+
+.rant-card__action.active {
+    color: var(--color-primary, #00ff87);
+}
+
+.rant-card__action.active svg {
+    fill: var(--color-primary, #00ff87);
+    stroke: var(--color-primary, #00ff87);
+}
+
+.rant-card__action svg {
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+.rant-card__action span {
+    min-width: 16px;
+}
+
+/* ── Readonly mode (unauthenticated) ── */
+.rant-card__actions--readonly .rant-card__action {
+    cursor: default;
+}
+
+.rant-card__actions--readonly .rant-card__action:hover {
+    background: transparent;
+    color: var(--color-text-muted, #3d4f6e);
+}
+
+.rant-card__action:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.rant-card__action:disabled:hover {
+    background: transparent;
+    color: var(--color-text-muted, #3d4f6e);
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .rant-card {
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md, 10px);
+    }
+
+    .rant-card__avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.75rem;
+    }
+
+    .rant-card__display-name {
+        font-size: 0.875rem;
+    }
+
+    .rant-card__username,
+    .rant-card__timestamp,
+    .rant-card__dot {
+        font-size: 0.75rem;
+    }
+
+    .rant-card__content {
+        font-size: 0.875rem;
+    }
+
+    .rant-card__actions {
+        gap: 0.5rem;
+        justify-content: space-around;
+    }
+
+    .rant-card__action {
+        font-size: 0.75rem;
+        padding: 0.25rem;
+    }
+}

@@ -1,0 +1,81 @@
+<div class="rp-root">
+
+  <!-- Search – hidden on Explore (it has its own search bar) -->
+  @if (!isExplorePage) {
+  <div class="rp-search">
+    <span class="rp-search-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </span>
+    <input type="text" placeholder="Search Rants" class="rp-search-input" />
+  </div>
+  }
+
+  <!-- Trending -->
+  <div class="rp-card">
+    <h2 class="rp-card-title">What's trending</h2>
+
+    <div class="rp-trend-item">
+      <span class="rp-trend-cat">Technology · Trending</span>
+      <span class="rp-trend-tag">#AITakeover</span>
+      <span class="rp-trend-count">42.1K rants</span>
+    </div>
+
+    <div class="rp-trend-item">
+      <span class="rp-trend-cat">Politics · Trending</span>
+      <span class="rp-trend-tag">#ChaosGovernment</span>
+      <span class="rp-trend-count">19.8K rants</span>
+    </div>
+
+    <div class="rp-trend-item">
+      <span class="rp-trend-cat">Gaming · Trending</span>
+      <span class="rp-trend-tag">#LiveServiceBad</span>
+      <span class="rp-trend-count">11.3K rants</span>
+    </div>
+
+    <div class="rp-trend-item">
+      <span class="rp-trend-cat">Life · Trending</span>
+      <span class="rp-trend-tag">#MondayAgain</span>
+      <span class="rp-trend-count">8.5K rants</span>
+    </div>
+
+    <button class="rp-show-more">Show more</button>
+  </div>
+
+  <!-- Who to Follow -->
+  <div class="rp-card">
+    <h2 class="rp-card-title">Who to follow</h2>
+
+    <div class="rp-follow-item">
+      <div class="rp-follow-avatar" style="background: #e040fb;">A</div>
+      <div class="rp-follow-info">
+        <span class="rp-follow-name">Angela</span>
+        <span class="rp-follow-handle">&#64;angela_rants</span>
+      </div>
+      <button class="rp-follow-btn">Follow</button>
+    </div>
+
+    <div class="rp-follow-item">
+      <div class="rp-follow-avatar" style="background: #00bcd4;">J</div>
+      <div class="rp-follow-info">
+        <span class="rp-follow-name">JustJordan</span>
+        <span class="rp-follow-handle">&#64;just_jordan</span>
+      </div>
+      <button class="rp-follow-btn">Follow</button>
+    </div>
+
+    <div class="rp-follow-item">
+      <div class="rp-follow-avatar" style="background: #ff7043;">R</div>
+      <div class="rp-follow-info">
+        <span class="rp-follow-name">RantKing</span>
+        <span class="rp-follow-handle">&#64;rantking99</span>
+      </div>
+      <button class="rp-follow-btn">Follow</button>
+    </div>
+
+    <button class="rp-show-more">Show more</button>
+  </div>
+
+</div>

@@ -1,0 +1,31 @@
+<div class="nc" [class.nc--unread]="!notification().isRead">
+  <!-- Icon -->
+  <div class="nc__icon" [style.--icon-color]="iconColor(notification().type)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      stroke-linejoin="round" width="16" height="16">
+      <path [attr.d]="iconPath(notification().type)" />
+    </svg>
+  </div>
+
+  <!-- Avatar -->
+  <div class="nc__avatar" [style.background]="notification().userAvatarColor" aria-hidden="true">
+    {{ notification().userInitials }}
+  </div>
+
+  <!-- Content -->
+  <div class="nc__body">
+    <p class="nc__text">
+      <strong class="nc__user">{{ notification().userDisplayName }}</strong>
+      <span class="nc__action"> {{ notification().message }}</span>
+    </p>
+    @if (notification().relatedRantContent) {
+      <p class="nc__rant-preview">"{{ notification().relatedRantContent }}"</p>
+    }
+    <span class="nc__time">{{ notification().createdAt | date:'short' }}</span>
+  </div>
+
+  <!-- Unread dot -->
+  @if (!notification().isRead) {
+    <span class="nc__unread-dot" aria-label="Unread"></span>
+  }
+</div>

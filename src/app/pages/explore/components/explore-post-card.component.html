@@ -1,0 +1,8 @@
+<article class="explore-post-card">
+  <span class="explore-post-card__cat">{{ post().category }}</span>
+  <span class="explore-post-card__tag">{{ post().tag }}</span>
+  @if (post().description) {
+    <span class="explore-post-card__desc">{{ post().description }}</span>
+  }
+  <span class="explore-post-card__count">{{ post().count }}</span>
+</article>

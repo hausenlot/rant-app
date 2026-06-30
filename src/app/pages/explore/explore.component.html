@@ -1,0 +1,14 @@
+<section class="page explore-page">
+  <app-explore-search />
+
+  <nav class="explore-nav" role="tablist" aria-label="Explore tabs">
+    <a routerLink="for-you" routerLinkActive="active" class="explore-nav__tab" role="tab">For you</a>
+    <a routerLink="trending" routerLinkActive="active" class="explore-nav__tab" role="tab">Trending</a>
+    <a routerLink="memes" routerLinkActive="active" class="explore-nav__tab" role="tab">Memes</a>
+    <a routerLink="games" routerLinkActive="active" class="explore-nav__tab" role="tab">Games</a>
+  </nav>
+
+  <div class="explore-content">
+    <router-outlet />
+  </div>
+</section>

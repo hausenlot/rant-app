@@ -1,0 +1,103 @@
+<nav class="sidebar">
+
+  <!-- Logo / Brand -->
+  <a routerLink="/" class="sidebar-brand">
+    <span class="brand-icon">🔥</span>
+    <span class="brand-name">RantApp</span>
+  </a>
+
+  <!-- Nav Links -->
+  <ul class="sidebar-nav">
+    <li>
+      <a routerLink="/feed" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </span>
+        <span class="nav-label">Feed</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/explore" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
+        <span class="nav-label">Explore</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/notifications" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </span>
+        <span class="nav-label">Notifications</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/messages" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </span>
+        <span class="nav-label">Messages</span>
+      </a>
+    </li>
+    <li>
+      <a routerLink="/bookmarks" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M19 21l-7-7-7 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" />
+          </svg>
+        </span>
+        <span class="nav-label">Bookmarks</span>
+      </a>
+    </li>
+  </ul>
+
+  <!-- Bottom Section: pushed to the very bottom via margin-top: auto -->
+  <div class="sidebar-bottom">
+
+    <!-- Post / Rant Button -->
+    <button class="btn-post">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+        stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      <span>Rant</span>
+    </button>
+
+    <!-- User Account (also the Profile entry point) -->
+    <a routerLink="/profile" routerLinkActive="active" class="sidebar-user">
+      <div class="user-avatar">
+        <span>U</span>
+      </div>
+      <div class="user-info">
+        <span class="user-name">Username</span>
+        <span class="user-handle">@handle</span>
+      </div>
+      <div class="user-more">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+          <circle cx="5" cy="12" r="2" />
+          <circle cx="12" cy="12" r="2" />
+          <circle cx="19" cy="12" r="2" />
+        </svg>
+      </div>
+    </a>
+
+  </div>
+
+</nav>

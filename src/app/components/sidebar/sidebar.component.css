@@ -1,0 +1,328 @@
+/* ─── Sidebar Shell ─────────────────────────────────────────── */
+.sidebar {
+  width: 275px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1rem;
+  background: var(--color-bg);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--color-border);
+  gap: 0.25rem;
+}
+
+/* ─── Brand ─────────────────────────────────────────────────── */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  border-radius: 14px;
+  margin-bottom: 0.5rem;
+  transition: background 0.2s;
+}
+
+.sidebar-brand:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.brand-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.03em;
+}
+
+/* ─── Nav List ───────────────────────────────────────────────── */
+.sidebar-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* ─── Nav Item ───────────────────────────────────────────────── */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+}
+
+.nav-item.active {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.nav-item.active .nav-icon {
+  color: var(--color-primary);
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.nav-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-label {
+  font-size: 1.0625rem;
+}
+
+/* ─── Bottom Section Container ────────────────────────────────── */
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ─── Post / Rant Button ─────────────────────────────────────── */
+.btn-post {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-primary);
+  background: rgba(0, 255, 135, 0.10);
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 16px var(--color-primary-glow);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.btn-post svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-post:hover {
+  background: rgba(255, 0, 128, 0.15);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 24px rgba(255, 0, 128, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-post:active {
+  transform: translateY(0);
+}
+
+/* ─── Bottom Section (Rant btn + User) ───────────────────────── */
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* ─── User Section ───────────────────────────────────────────── */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s;
+}
+
+.sidebar-user:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-handle {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.user-more {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MOBILE: Bottom Nav Bar  (≤ 768px)
+───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0;
+    height: 60px;
+    border-right: none;
+    border-top: 1px solid var(--color-border);
+    background: rgba(15, 10, 30, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    gap: 0;
+  }
+
+  /* Hide brand logo in bottom nav */
+  .sidebar-brand {
+    display: none;
+  }
+
+  /* Sidebar no longer spans the full viewport height */
+  .sidebar {
+    min-height: 60px;
+    height: 60px;
+  }
+
+  /* Nav becomes a horizontal row */
+  .sidebar-nav {
+    flex-direction: row;
+    justify-content: space-around;
+    flex: 1;
+    gap: 0;
+  }
+
+  .sidebar-nav li {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Nav items: icon only, centered */
+  .nav-item {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    padding: 8px 0;
+    border-radius: 0;
+    width: 100%;
+    background: transparent !important;
+  }
+
+  .nav-item.active .nav-icon {
+    color: var(--color-primary);
+  }
+
+  /* Scale up icons slightly for touch targets */
+  .nav-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Hide nav labels */
+  .nav-label {
+    display: none;
+  }
+
+  /* Hide the Rant / Post button in the mobile bottom nav */
+  .btn-post {
+    display: none;
+  }
+
+  /* Bottom section shrinks to just the user chip */
+  .sidebar-bottom {
+    margin-top: 0;
+    flex-shrink: 0;
+    padding: 0 4px;
+  }
+
+  /* User chip becomes a compact, icon-only circle in the bottom nav */
+  .sidebar-user {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    padding: 8px;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    margin: 0 auto;
+  }
+
+  .sidebar-user.active .user-avatar {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  /* Hide username / handle / more menu in the bottom nav */
+  .user-info,
+  .user-more {
+    display: none;
+  }
+}

@@ -1,0 +1,22 @@
+<section class="page notifications-page">
+  <div class="page-header">
+    <h1>Notifications</h1>
+    @if (unreadCount > 0) {
+      <p>{{ unreadCount }} unread notification{{ unreadCount === 1 ? '' : 's' }}</p>
+    } @else {
+      <p>You're all caught up.</p>
+    }
+  </div>
+
+  <div class="notifications-list">
+    @for (notification of notifications(); track notification.id) {
+      <app-notification-card [notification]="notification" />
+    } @empty {
+      <div class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <h2>No notifications yet</h2>
+        <p>When someone interacts with your rants, you'll see it here.</p>
+      </div>
+    }
+  </div>
+</section>

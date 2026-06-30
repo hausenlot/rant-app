@@ -1,0 +1,65 @@
+<section class="page feed-page" #feedPage>
+  <!-- Authenticated: show the compose input -->
+  @if (isAuthenticated()) {
+  <div class="feed-compose" aria-label="Compose a rant">
+    <span class="feed-compose__avatar" aria-hidden="true">Y</span>
+    <input type="text" class="feed-compose__input" placeholder="What's ranting?" aria-label="Compose a rant" />
+  </div>
+  }
+
+  <!-- Unauthenticated: prompt to sign in -->
+  @if (!isAuthenticated()) {
+  <div class="feed-auth-prompt">
+    <p>Sign in to post rants, like, and bookmark.</p>
+    <a routerLink="/auth/sign-in" class="feed-auth-prompt__link">Sign in</a>
+  </div>
+  }
+
+  <!-- Refreshing indicator -->
+  @if (feed.isRefreshing()) {
+  <div class="feed-refresh-bar">Refreshing…</div>
+  }
+
+  <!-- Error state -->
+  @if (feed.hasError()) {
+  <div class="feed-error">
+    {{ feed.error() }}
+    <button class="feed-error__retry" (click)="feed.loadFirstPage()">Retry</button>
+  </div>
+  }
+
+  <!-- Empty feed -->
+  @if (feed.isEmpty()) {
+  <div class="empty-state">
+    <div class="empty-icon" aria-hidden="true">💭</div>
+    <h2>No rants yet</h2>
+    <p>Be the first to rant!</p>
+  </div>
+  }
+
+  <!-- Feed container — shared by skeletons and real cards -->
+  <div class="feed-rants">
+    <!-- Loading (first page) — skeleton cards -->
+    @if (feed.isLoading() && !feed.hasLoadedOnce()) {
+    <app-rant-card-skeleton [count]="5" />
+    }
+
+    <!-- Real cards -->
+    @for (rant of feed.items(); track rant.id) {
+    <app-rant-card [rant]="rant" [readonly]="!isAuthenticated()" (likeClick)="onToggleLike(rant.id)"
+      (rerantClick)="onToggleRerant(rant.id)" (bookmarkClick)="onToggleBookmark(rant.id)"></app-rant-card>
+    }
+
+    <!-- Loading more — single skeleton at the bottom -->
+    @if (feed.isLoadingMore()) {
+    <app-rant-card-skeleton [count]="1" />
+    }
+  </div>
+
+  <!-- Load more -->
+  @if (feed.items().length > 0 && feed.hasMore() && !feed.isLoadingMore()) {
+  <div class="feed-load-more">
+    <button class="feed-load-more__btn" (click)="feed.loadNextPage()">Load more</button>
+  </div>
+  }
+</section>

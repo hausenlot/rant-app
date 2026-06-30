@@ -1,1 +1,171 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ────────────────────────────────────────────
+   CSS Custom Properties (Design Tokens)
+   — Midnight Neon palette
+──────────────────────────────────────────── */
+:root {
+  --color-bg: #05080f;
+  --color-surface: #0a0e1a;
+  --color-surface-2: #111828;
+  --color-border: rgba(255, 255, 255, 0.10);
+  --color-text: #dde4f0;
+  --color-text-muted: #3d4f6e;
+  --color-primary: #00ff87;
+  --color-primary-glow: rgba(0, 255, 135, 0.15);
+  --color-accent: #ff0080;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --transition: 0.2s ease;
+}
+
+/* ────────────────────────────────────────────
+   Reset & Base
+──────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+
+html {
+  overflow-y: scroll;
+}
+
+/* ────────────────────────────────────────────
+   Shared page wrapper
+   Every page uses <section class="page {slug}-page">
+──────────────────────────────────────────── */
+.page {
+  padding: 2rem;
+}
+
+/* ────────────────────────────────────────────
+   Page header (Feed / Profile / About)
+──────────────────────────────────────────── */
+.page-header {
+  margin-bottom: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-header p {
+  color: var(--color-text-muted);
+  margin-top: 0.4rem;
+}
+
+/* ────────────────────────────────────────────
+   Empty state (Feed / Profile)
+──────────────────────────────────────────── */
+/* .empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: var(--color-text-muted);
+} */
+
+
+/* ────────────────────────────────────────────
+   Buttons (global utilities)
+──────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-sm {
+  padding: 0.4rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-primary {
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 12px var(--color-primary-glow);
+}
+
+.btn-primary:hover {
+  background: rgba(255, 0, 128, 0.15);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(255, 0, 128, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+}
+
+.btn-ghost:hover {
+  background: rgba(0, 255, 135, 0.08);
+  color: var(--color-text);
+  border-color: var(--color-primary);
+}
+
+/* ────────────────────────────────────────────
+   Mobile base adjustments (≤ 768px)
+──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page {
+    padding: 1.5rem 1rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+}
