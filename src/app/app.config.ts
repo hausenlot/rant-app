@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
 import { provideAuthContext } from './contexts/auth.context';
@@ -15,5 +16,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     // App-wide auth state (singleton) — shared current-user signal across the app.
     provideAuthContext(),
+    // Animations for transitions
+    provideAnimations(),
   ],
 };

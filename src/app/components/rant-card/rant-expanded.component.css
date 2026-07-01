@@ -1,0 +1,519 @@
+/* ── Rant Expanded (In-Place Post Detail) ── */
+.rant-expanded {
+  /* background: var(--color-surface, #0a0e1a); */
+  /* border: 1px solid var(--color-border, rgba(255, 255, 255, 0.10)); */
+  /* border-radius: var(--radius-lg, 12px); */
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Close Button ── */
+.rant-expanded__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6e7681);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.rant-expanded__close:hover {
+  background: rgba(0, 255, 135, 0.1);
+  color: var(--color-primary, #00ff87);
+}
+
+/* ── Rant (Main Post) ── */
+.rant-expanded__rant {
+  padding: 1rem 1.25rem;
+  position: relative;
+}
+
+.rant-expanded__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.rant-expanded__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rant-expanded__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.rant-expanded__user-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.rant-expanded__display-name {
+  font-weight: 700;
+  color: var(--color-text, #dde4f0);
+  font-size: 1rem;
+}
+
+.rant-expanded__username {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.875rem;
+}
+
+/* ── Body ── */
+.rant-expanded__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.rant-expanded__content {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text, #dde4f0);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ── Quote ── */
+/* ── Quote ── */
+.rant-expanded__quote {
+  padding: 0.625rem 0 0.625rem 1rem;
+  background: var(--color-surface-2, #111828);
+  border-radius: var(--radius-sm, 8px) var(--radius-sm, 8px) 0;
+}
+
+.rant-expanded__quote-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.rant-expanded__quote-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rant-expanded__quote-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.rant-expanded__quote-name {
+  font-weight: 600;
+  color: var(--color-text, #dde4f0);
+  font-size: 0.875rem;
+}
+
+.rant-expanded__quote-username {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.8125rem;
+}
+
+.rant-expanded__quote-dot {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.8125rem;
+}
+
+.rant-expanded__quote-time {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.8125rem;
+}
+
+.rant-expanded__quote-content {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text, #dde4f0);
+  word-break: break-word;
+}
+
+.rant-expanded__quote-media {
+  margin-top: 0.5rem;
+  border-radius: var(--radius-sm, 8px);
+  overflow: hidden;
+  max-height: 50vh;
+  width: 100%;
+}
+
+.rant-expanded__quote-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.rant-expanded__metadata {
+  padding: 0.5rem 0;
+}
+
+.rant-expanded__post-time {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.875rem;
+  cursor: default;
+}
+
+/* ── Media ── */
+.rant-expanded__media {
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.rant-expanded__media:hover {
+  opacity: 0.9;
+}
+
+.rant-expanded__image {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+}
+
+.rant-expanded__video {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+
+/* ── Actions ── */
+.rant-expanded__actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.10));
+  border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.10));
+  /* margin-top: 0.5rem; */
+  flex-wrap: wrap;
+}
+
+.rant-expanded__action {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.875rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 36px;
+}
+
+.rant-expanded__action:hover:not(:disabled) {
+  background: rgba(0, 255, 135, 0.1);
+  color: var(--color-primary, #00ff87);
+}
+
+.rant-expanded__action.active {
+  color: var(--color-primary, #00ff87);
+}
+
+.rant-expanded__action.active svg {
+  fill: var(--color-primary, #00ff87);
+  stroke: var(--color-primary, #00ff87);
+}
+
+.rant-expanded__action svg {
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.rant-expanded__action:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.rant-expanded__action:disabled:hover {
+  background: transparent;
+  color: var(--color-text-muted, #6e7681);
+}
+
+/* ── Replies ── */
+.rant-expanded__replies {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
+  background: var(--color-surface-2, #111828);
+}
+
+.rant-expanded__replies-title {
+  margin: 0 0 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text, #dde4f0);
+}
+
+.rant-expanded__replies-count {
+  font-weight: 400;
+  color: var(--color-text-muted, #6e7681);
+}
+
+.rant-expanded__replies-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rant-expanded__reply {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
+}
+
+.rant-expanded__reply:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rant-expanded__reply-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rant-expanded__reply-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.rant-expanded__reply-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.rant-expanded__reply-name {
+  font-weight: 600;
+  color: var(--color-text, #dde4f0);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rant-expanded__reply-username {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.rant-expanded__reply-dot {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.rant-expanded__reply-time {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.rant-expanded__reply-content {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text, #dde4f0);
+  word-break: break-word;
+  padding-left: 36px;
+}
+
+.rant-expanded__reply-media {
+  max-width: 100%;
+  border-radius: var(--radius-sm, 8px);
+  margin-top: 0.375rem;
+}
+
+/* ── Loading ── */
+.rant-expanded__loading-replies {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.rant-expanded__loading-dots {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.rant-expanded__loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-muted, #6e7681);
+  animation: dot-bounce 1.2s ease-in-out infinite;
+}
+
+.rant-expanded__loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.rant-expanded__loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dot-bounce {
+
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* ── No Replies ── */
+.rant-expanded__no-replies {
+  text-align: center;
+  color: var(--color-text-muted, #6e7681);
+  padding: 2rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* ── Load More ── */
+.rant-expanded__load-more {
+  width: 100%;
+  padding: 0.625rem;
+  margin-top: 0.5rem;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-primary, #00ff87);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.rant-expanded__load-more:hover:not(:disabled) {
+  background: var(--color-surface, #0a0e1a);
+}
+
+.rant-expanded__load-more:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .rant-expanded {
+    margin: 0 -0.5rem;
+    border-radius: var(--radius-md, 10px);
+  }
+
+  .rant-expanded__rant {
+    padding: 0.75rem 1rem;
+  }
+
+  .rant-expanded__avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 0.875rem;
+  }
+
+  .rant-expanded__display-name {
+    font-size: 0.9375rem;
+  }
+
+  .rant-expanded__username,
+  .rant-expanded__timestamp {
+    font-size: 0.8125rem;
+  }
+
+  .rant-expanded__content {
+    font-size: 0.9375rem;
+  }
+
+  .rant-expanded__actions {
+    gap: 0.5rem;
+    justify-content: space-around;
+  }
+
+  .rant-expanded__action {
+    font-size: 0.75rem;
+    padding: 0.25rem;
+  }
+
+  .rant-expanded__replies {
+    padding: 0.75rem 1rem;
+  }
+}

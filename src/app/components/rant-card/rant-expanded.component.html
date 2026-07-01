@@ -1,0 +1,164 @@
+<div class="rant-expanded" role="article" aria-label="Expanded post">
+  <!-- Close button -->
+  <!-- <button class="rant-expanded__close" (click)="onClose()" aria-label="Close expanded post">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  </button> -->
+
+  <!-- Original rant - larger, prominent -->
+  <article class="rant-expanded__rant">
+    <div class="rant-expanded__header">
+      <div class="rant-expanded__avatar" [style.background]="getAvatarColor(rant.username)">
+        {{ getAvatarInitials(rant.displayName) }}
+      </div>
+      <div class="rant-expanded__user-info">
+        <div class="rant-expanded__user-info-row">
+          <span class="rant-expanded__display-name">{{ rant.displayName }}</span>
+        </div>
+        <div class="rant-expanded__user-info-row">
+          <span class="rant-expanded__username">@{{ rant.username }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rant-expanded__body">
+      <p class="rant-expanded__content">{{ rant.content }}</p>
+
+      <!-- Quote Rant -->
+      @if (rant.quoteRant) {
+      <div class="rant-expanded__quote">
+        <div class="rant-expanded__quote-header">
+          <div class="rant-expanded__quote-avatar" [style.background]="getAvatarColor(rant.quoteRant.username)">
+            {{ getAvatarInitials(rant.quoteRant.displayName) }}
+          </div>
+          <div class="rant-expanded__quote-user-info">
+            <span class="rant-expanded__quote-name">{{ rant.quoteRant.displayName }}</span>
+            <span class="rant-expanded__quote-username">@{{ rant.quoteRant.username }}</span>
+            <span class="rant-expanded__quote-dot" aria-hidden="true">·</span>
+            <time class="rant-expanded__quote-time" [attr.datetime]="rant.quoteRant.createdAt">
+              {{ formatDate(rant.quoteRant.createdAt) }}
+            </time>
+          </div>
+        </div>
+        <p class="rant-expanded__quote-content">{{ rant.quoteRant.content }}</p>
+        @if (rant.quoteRant.mediaUrl) {
+        <div class="rant-expanded__quote-media">
+          @if (rant.quoteRant.mediaType === 'image') {
+          <img [src]="rant.quoteRant.mediaUrl" alt="Quoted post media" loading="lazy" />
+          } @else if (rant.quoteRant.mediaType === 'video') {
+          <app-video-player [src]="rant.quoteRant.mediaUrl"></app-video-player>
+          }
+        </div>
+        }
+      </div>
+      }
+
+      <!-- Media (this rant's own media) -->
+      @if (rant.mediaUrl) {
+      <div class="rant-expanded__media" (click)="onMediaClick()">
+        @if (getMediaType() === 'image') {
+        <img [src]="getMediaUrl()" alt="Post media" class="rant-expanded__image" loading="eager" />
+        } @else if (getMediaType() === 'video') {
+        <app-video-player [src]="getMediaUrl()!"></app-video-player>
+        }
+      </div>
+      }
+    </div>
+
+    <div class="rant-expanded__metadata">
+      <time class="rant-expanded__post-time" [attr.datetime]="rant.createdAt" [title]="getFullTime(rant.createdAt)">
+        {{ getLocalTime(rant.createdAt) }}
+      </time>
+    </div>
+
+    <!-- Actions -->
+    <div class="rant-expanded__actions">
+      <button class="rant-expanded__action" aria-label="Reply" [disabled]="readonly">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <span>{{ formatCount(rant.replyCount) }}</span>
+      </button>
+
+      <button class="rant-expanded__action" aria-label="Re-rant" [class.active]="rant.isRerantedByMe"
+        [disabled]="readonly" (click)="onRerant()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <polyline points="17 1 21 5 17 9" />
+          <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+          <polyline points="7 23 3 19 7 15" />
+          <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+        </svg>
+        <span>{{ formatCount(rant.reRantCount) }}</span>
+      </button>
+
+      <button class="rant-expanded__action" [class.active]="rant.isLikedByMe" aria-label="Like" [disabled]="readonly"
+        (click)="onLike()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+        </svg>
+        <span>{{ formatCount(rant.likeCount) }}</span>
+      </button>
+
+      <button class="rant-expanded__action" [class.active]="rant.isBookmarkedByMe" aria-label="Bookmark"
+        [disabled]="readonly" (click)="onBookmark()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+        </svg>
+      </button>
+    </div>
+  </article>
+
+  <!-- Replies section -->
+  <section class="rant-expanded__replies" aria-label="Replies">
+    <h2 class="rant-expanded__replies-title">
+      Replies <span class="rant-expanded__replies-count">{{ formatCount(rant.replyCount) }}</span>
+    </h2>
+
+    @if (loadingReplies() && replies().length === 0) {
+    <div class="rant-expanded__loading-replies">
+      <div class="rant-expanded__loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    } @else if (replies().length === 0) {
+    <p class="rant-expanded__no-replies">No replies yet. Be the first to reply!</p>
+    } @else {
+    <ul class="rant-expanded__replies-list" role="list">
+      @for (reply of replies(); track reply.id) {
+      <li class="rant-expanded__reply">
+        <div class="rant-expanded__reply-header">
+          <div class="rant-expanded__reply-avatar" [style.background]="getAvatarColor(reply.username)">
+            {{ getAvatarInitials(reply.displayName) }}
+          </div>
+          <div class="rant-expanded__reply-user-info">
+            <span class="rant-expanded__reply-name">{{ reply.displayName }}</span>
+            <span class="rant-expanded__reply-username">@{{ reply.username }}</span>
+            <span class="rant-expanded__reply-dot" aria-hidden="true">·</span>
+            <time class="rant-expanded__reply-time" [attr.datetime]="reply.createdAt">
+              {{ formatDate(reply.createdAt) }}
+            </time>
+          </div>
+        </div>
+        <p class="rant-expanded__reply-content">{{ reply.content }}</p>
+        @if (reply.mediaUrl) {
+        <img [src]="reply.mediaUrl" alt="Reply media" class="rant-expanded__reply-media" loading="lazy" />
+        }
+      </li>
+      }
+    </ul>
+
+    @if (hasMoreReplies()) {
+    <button class="rant-expanded__load-more" (click)="loadMoreReplies()" [disabled]="loadingReplies()">
+      @if (loadingReplies()) {
+      <span class="rant-expanded__loading-dots"><span></span><span></span><span></span></span>
+      } @else {
+      Load more replies
+      }
+    </button>
+    }
+    }
+  </section>
+</div>

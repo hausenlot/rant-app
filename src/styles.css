@@ -57,7 +57,7 @@ html {
    Every page uses <section class="page {slug}-page">
 ──────────────────────────────────────────── */
 .page {
-  padding: 2rem;
+  /* padding: 2rem; */
 }
 
 /* ────────────────────────────────────────────

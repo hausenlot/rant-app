@@ -1,16 +1,16 @@
-<article class="rant-card" *ngIf="rant">
+<article class="rant-card" *ngIf="rant" (click)="onContentClick($event)">
     <!-- Re-rant label — shown when someone re-ranted this into your timeline -->
     @if (rant.reRantedByUsername) {
-        <div class="rant-card__rerant-label">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" width="14" height="14">
-                <polyline points="17 1 21 5 17 9" />
-                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-                <polyline points="7 23 3 19 7 15" />
-                <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-            </svg>
-            <span>Re-ranted by @{{ rant.reRantedByUsername }}</span>
-        </div>
+    <div class="rant-card__rerant-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" width="14" height="14">
+            <polyline points="17 1 21 5 17 9" />
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+            <polyline points="7 23 3 19 7 15" />
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+        </svg>
+        <span>Re-ranted by @{{ rant.reRantedByUsername }}</span>
+    </div>
     }
 
     <!-- Header -->
@@ -33,44 +33,57 @@
         <!-- Quote Rant (quoted re-rant with commentary) -->
         <div class="rant-card__quote" *ngIf="rant.quoteRant">
             <div class="rant-card__quote-header">
-                <span class="rant-card__quote-avatar">@{{ rant.quoteRant.username }}</span>
-                @if (rant.quoteRant.displayName) {
-                    <span class="rant-card__quote-name">{{ rant.quoteRant.displayName }}</span>
-                }
-                <span class="rant-card__quote-dot">·</span>
-                <span class="rant-card__quote-timestamp">{{ formatDate(rant.quoteRant.createdAt) }}</span>
+                <div class="rant-card__quote-avatar" [style.background]="getAvatarColor(rant.quoteRant.username)">
+                    {{ getQuoteAvatarInitials(rant.quoteRant.displayName || rant.quoteRant.username) }}
+                </div>
+                <div class="rant-card__quote-user-info">
+                    <span class="rant-card__quote-name">{{ rant.quoteRant.displayName || rant.quoteRant.username
+                        }}</span>
+                    <span class="rant-card__quote-username">@{{ rant.quoteRant.username }}</span>
+                    <span class="rant-card__quote-dot" aria-hidden="true">·</span>
+                    <time class="rant-card__quote-timestamp" [attr.datetime]="rant.quoteRant.createdAt">
+                        {{ formatDate(rant.quoteRant.createdAt) }}
+                    </time>
+                </div>
             </div>
             <p class="rant-card__quote-content">{{ rant.quoteRant.content }}</p>
 
-            <!-- Quote rant media -->
+            <!-- Quote rant media - click opens media modal -->
             @if (rant.quoteRant.mediaUrl) {
-                <div class="rant-card__quote-media">
-                    @if (!isQuoteImageLoaded()) {
-                        <div class="rant-card__media-loader">
-                            <span class="rant-card__media-dot"></span>
-                            <span class="rant-card__media-dot"></span>
-                            <span class="rant-card__media-dot"></span>
-                        </div>
-                    }
-                    <img [src]="rant.quoteRant.mediaUrl" alt="Quoted rant media" class="rant-card__quote-image"
-                         [class.rant-card__quote-image--loading]="!isQuoteImageLoaded()"
-                         loading="lazy" (load)="onQuoteImageLoad()" />
-                </div>
-            }
-        </div>
-
-        <!-- Media (this rant's own media) -->
-        <div class="rant-card__media" *ngIf="rant.mediaUrl">
-            @if (!isImageLoaded()) {
+            <div class="rant-card__quote-media" (click)="onMediaClick($event)">
+                @if (rant.quoteRant.mediaType === 'video') {
+                <app-video-player [src]="rant.quoteRant.mediaUrl"></app-video-player>
+                } @else {
+                @if (!isQuoteImageLoaded()) {
                 <div class="rant-card__media-loader">
                     <span class="rant-card__media-dot"></span>
                     <span class="rant-card__media-dot"></span>
                     <span class="rant-card__media-dot"></span>
                 </div>
+                }
+                <img [src]="rant.quoteRant.mediaUrl" alt="Quoted rant media" class="rant-card__quote-image"
+                    [class.rant-card__quote-image--loading]="!isQuoteImageLoaded()" loading="lazy"
+                    (load)="onQuoteImageLoad()" />
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Media (this rant's own media) - click opens media modal -->
+        <div class="rant-card__media" *ngIf="rant.mediaUrl" (click)="onMediaClick($event)">
+            @if (rant.mediaType === 'video') {
+            <app-video-player [src]="rant.mediaUrl"></app-video-player>
+            } @else {
+            @if (!isImageLoaded()) {
+            <div class="rant-card__media-loader">
+                <span class="rant-card__media-dot"></span>
+                <span class="rant-card__media-dot"></span>
+                <span class="rant-card__media-dot"></span>
+            </div>
             }
             <img [src]="rant.mediaUrl" alt="Rant media" class="rant-card__image"
-                 [class.rant-card__image--loading]="!isImageLoaded()"
-                 loading="lazy" (load)="onImageLoad()" />
+                [class.rant-card__image--loading]="!isImageLoaded()" loading="lazy" (load)="onImageLoad()" />
+            }
         </div>
     </div>
 
@@ -85,7 +98,7 @@
         </button>
 
         <button class="rant-card__action" aria-label="Re-rant" [class.active]="rant.isRerantedByMe"
-            [disabled]="readonly" (click)="onRerant()">
+            [disabled]="readonly" (click)="onRerant($event)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" width="17" height="17">
                 <polyline points="17 1 21 5 17 9" />
@@ -96,8 +109,8 @@
             <span>{{ rant.reRantCount || 0 }}</span>
         </button>
 
-        <button class="rant-card__action" aria-label="Like" [class.active]="rant.isLikedByMe"
-            [disabled]="readonly" (click)="onLike()">
+        <button class="rant-card__action" aria-label="Like" [class.active]="rant.isLikedByMe" [disabled]="readonly"
+            (click)="onLike($event)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" width="17" height="17">
                 <path
@@ -107,7 +120,7 @@
         </button>
 
         <button class="rant-card__action" aria-label="Bookmark" [class.active]="rant.isBookmarkedByMe"
-            [disabled]="readonly" (click)="onBookmark()">
+            [disabled]="readonly" (click)="onBookmark($event)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round" width="17" height="17">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />

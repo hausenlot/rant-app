@@ -46,6 +46,9 @@ import type { Rant } from '../models/rant.model';
 export const FEED_DEFAULT_PAGE_SIZE = 10;
 export type FeedStatus = 'idle' | 'loading' | 'refreshing' | 'loading-more' | 'error';
 
+/** UI state for expanded post (in-place) and media modal (overlay) */
+export type ExpandedPostMode = 'in-place' | 'modal';
+
 export interface FeedState {
   readonly items: Rant[];
   readonly rantMap: Record<string, Rant>;
@@ -53,6 +56,14 @@ export interface FeedState {
   readonly pageSize: number;
   readonly status: FeedStatus;
   readonly error: string | null;
+  // Scroll preservation
+  readonly scrollPosition: number;
+  // Expanded post (in-place) - clicking post body/content
+  readonly expandedPostId: string | null;
+  readonly expandedPostMode: ExpandedPostMode;
+  // Media modal - clicking media (image/video)
+  readonly mediaModalPostId: string | null;
+  readonly mediaModalMediaIndex: number; // for multi-media future support
 }
 
 export const INITIAL_FEED_STATE: FeedState = {
@@ -62,6 +73,11 @@ export const INITIAL_FEED_STATE: FeedState = {
   pageSize: FEED_DEFAULT_PAGE_SIZE,
   status: 'idle',
   error: null,
+  scrollPosition: 0,
+  expandedPostId: null,
+  expandedPostMode: 'in-place',
+  mediaModalPostId: null,
+  mediaModalMediaIndex: 0,
 };
 
 /* -------------------------------- Derived ------------------------------- */
@@ -75,6 +91,14 @@ export interface FeedDerived {
   readonly hasLoadedOnce: Signal<boolean>;
   readonly isEmpty: Signal<boolean>;
   readonly progressLabel: Signal<string>;
+  // NEW: UI state derived signals
+  readonly scrollPosition: Signal<number>;
+  readonly expandedPostId: Signal<string | null>;
+  readonly expandedPostMode: Signal<ExpandedPostMode>;
+  readonly expandedPost: Signal<Rant | null>;
+  readonly mediaModalPostId: Signal<string | null>;
+  readonly mediaModalMediaIndex: Signal<number>;
+  readonly isMediaModalOpen: Signal<boolean>;
 }
 
 /* --------------------------------- Context ------------------------------ */
@@ -90,6 +114,12 @@ export class FeedContext {
   private readonly pageSize = signal<number>(INITIAL_FEED_STATE.pageSize);
   private readonly status = signal<FeedStatus>(INITIAL_FEED_STATE.status);
   private readonly error = signal<string | null>(INITIAL_FEED_STATE.error);
+  // NEW: scroll + expanded post + media modal state
+  private readonly _scrollPosition = signal<number>(INITIAL_FEED_STATE.scrollPosition);
+  private readonly _expandedPostId = signal<string | null>(INITIAL_FEED_STATE.expandedPostId);
+  private readonly _expandedPostMode = signal<ExpandedPostMode>(INITIAL_FEED_STATE.expandedPostMode);
+  private readonly _mediaModalPostId = signal<string | null>(INITIAL_FEED_STATE.mediaModalPostId);
+  private readonly _mediaModalMediaIndex = signal<number>(INITIAL_FEED_STATE.mediaModalMediaIndex);
 
   readonly state = signal<FeedState>(INITIAL_FEED_STATE);
 
@@ -106,6 +136,17 @@ export class FeedContext {
     hasLoadedOnce: computed(() => this.page() > 0),
     isEmpty: computed(() => this.page() > 0 && this.items().length === 0),
     progressLabel: computed(() => `${this.items().length} rants`),
+    // NEW: UI state derived signals
+    scrollPosition: computed(() => this._scrollPosition()),
+    expandedPostId: computed(() => this._expandedPostId()),
+    expandedPostMode: computed(() => this._expandedPostMode()),
+    expandedPost: computed(() => {
+      const id = this._expandedPostId();
+      return id ? this.rantMap()[id] ?? null : null;
+    }),
+    mediaModalPostId: computed(() => this._mediaModalPostId()),
+    mediaModalMediaIndex: computed(() => this._mediaModalMediaIndex()),
+    isMediaModalOpen: computed(() => this._mediaModalPostId() !== null),
   };
 
   /* ------------------------------- Actions ------------------------------ */
@@ -146,6 +187,12 @@ export class FeedContext {
     this.page.set(0);
     this.error.set(null);
     this.status.set('idle');
+    // Clear UI state
+    this._scrollPosition.set(0);
+    this._expandedPostId.set(null);
+    this._expandedPostMode.set('in-place');
+    this._mediaModalPostId.set(null);
+    this._mediaModalMediaIndex.set(0);
     this.syncState();
   }
 
@@ -228,6 +275,55 @@ export class FeedContext {
       });
   }
 
+  /* ------------------------ Post Expansion & Media Modal ------------------------ */
+
+  /** Expand a post in-place (click on post content). */
+  expandPost(id: string, mode: ExpandedPostMode = 'in-place'): void {
+    this._expandedPostId.set(id);
+    this._expandedPostMode.set(mode);
+    this.syncState();
+  }
+
+  /** Collapse the currently expanded post. */
+  collapsePost(): void {
+    this._expandedPostId.set(null);
+    this._expandedPostMode.set('in-place');
+    this.syncState();
+  }
+
+  /** Open media modal for a post (click on media). */
+  openMediaModal(postId: string, mediaIndex: number = 0): void {
+    this._mediaModalPostId.set(postId);
+    this._mediaModalMediaIndex.set(mediaIndex);
+    this.syncState();
+  }
+
+  /** Close the media modal. */
+  closeMediaModal(): void {
+    this._mediaModalPostId.set(null);
+    this._mediaModalMediaIndex.set(0);
+    this.syncState();
+  }
+
+  /* ------------------------ Scroll Position Preservation ------------------------ */
+
+  /** Save current feed scroll position. */
+  saveScrollPosition(position: number): void {
+    this._scrollPosition.set(Math.max(0, position));
+    this.syncState();
+  }
+
+  /** Get saved scroll position. */
+  getScrollPosition(): number {
+    return this._scrollPosition();
+  }
+
+  /** Clear saved scroll position (e.g., on feed reset). */
+  clearScrollPosition(): void {
+    this._scrollPosition.set(0);
+    this.syncState();
+  }
+
   /* ------------------------------ Internals ----------------------------- */
 
   private isQueryInFlight(): boolean {
@@ -307,6 +403,11 @@ export class FeedContext {
       pageSize: this.pageSize(),
       status: this.status(),
       error: this.error(),
+      scrollPosition: this._scrollPosition(),
+      expandedPostId: this._expandedPostId(),
+      expandedPostMode: this._expandedPostMode(),
+      mediaModalPostId: this._mediaModalPostId(),
+      mediaModalMediaIndex: this._mediaModalMediaIndex(),
     });
   }
 

@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Rant } from '../../models/rant.model';
+import { VideoPlayerComponent } from '../video-player/video-player.component';
 
 @Component({
     selector: 'app-rant-card',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, VideoPlayerComponent],
     templateUrl: './rant-card.component.html',
     styleUrl: './rant-card.component.css',
     // Force the host element to behave
@@ -25,6 +26,10 @@ export class RantCardComponent {
     @Output() rerantClick = new EventEmitter<string>();
     /** Emitted when the bookmark button is clicked. */
     @Output() bookmarkClick = new EventEmitter<string>();
+    /** Emitted when the post content (non-media area) is clicked - expands in-place. */
+    @Output() contentClick = new EventEmitter<string>();
+    /** Emitted when the media (image/video) is clicked - opens media modal. */
+    @Output() mediaClick = new EventEmitter<string>();
 
     /** Track which images have finished loading, keyed by rant id. */
     private loadedImages = new Set<string>();
@@ -41,7 +46,7 @@ export class RantCardComponent {
             .slice(0, 2) || this.rant.username?.substring(0, 2).toUpperCase() || '?';
     }
 
-    getAvatarColor(): string {
+    getAvatarColor(username?: string): string {
         const colors = [
             'linear-gradient(135deg, #6366f1, #8b5cf6)',
             'linear-gradient(135deg, #ec4899, #f43f5e)',
@@ -51,8 +56,23 @@ export class RantCardComponent {
             'linear-gradient(135deg, #8b5cf6, #a855f7)',
             'linear-gradient(135deg, #ef4444, #dc2626)',
         ];
-        const index = parseInt(this.rant.id.split('-')[1] || '0') % colors.length;
+        const seed = username || this.rant?.username || this.rant?.id || '0';
+        let sum = 0;
+        for (let i = 0; i < seed.length; i++) {
+            sum += seed.charCodeAt(i);
+        }
+        const index = sum % colors.length;
         return colors[index];
+    }
+
+    getQuoteAvatarInitials(displayName: string | undefined): string {
+        if (!displayName) return '?';
+        return displayName
+            .split(' ')
+            .map(name => name[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
     }
 
     /** Whether the media image for this rant has finished loading. */
@@ -89,15 +109,30 @@ export class RantCardComponent {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    onLike(): void {
+    onLike(event: Event): void {
+        event.stopPropagation();
         if (!this.readonly) this.likeClick.emit(this.rant.id);
     }
 
-    onRerant(): void {
+    onRerant(event: Event): void {
+        event.stopPropagation();
         if (!this.readonly) this.rerantClick.emit(this.rant.id);
     }
 
-    onBookmark(): void {
+    onBookmark(event: Event): void {
+        event.stopPropagation();
         if (!this.readonly) this.bookmarkClick.emit(this.rant.id);
+    }
+
+    /** Handle click on post content area (header, text, quote) - expands in-place. */
+    onContentClick(event: MouseEvent): void {
+        event.stopPropagation();
+        if (!this.readonly) this.contentClick.emit(this.rant.id);
+    }
+
+    /** Handle click on media (image/video) - opens media modal. */
+    onMediaClick(event: MouseEvent): void {
+        event.stopPropagation();
+        this.mediaClick.emit(this.rant.id);
     }
 }

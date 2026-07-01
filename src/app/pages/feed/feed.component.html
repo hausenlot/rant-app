@@ -1,4 +1,27 @@
 <section class="page feed-page" #feedPage>
+  @if (feed.expandedPostId()) {
+  <!-- Detailed post view -->
+  <div class="feed-detail-header">
+    <button class="feed-detail-header__back" (click)="onCollapsePost()" aria-label="Back to feed">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+        <line x1="19" y1="12" x2="5" y2="12" />
+        <polyline points="12 19 5 12 12 5" />
+      </svg>
+    </button>
+    <h1 class="feed-detail-header__title">Rant</h1>
+  </div>
+
+  @if (currentExpandedRant(); as rant) {
+  <app-rant-expanded [rant]="rant" [readonly]="!isAuthenticated()" (close)="onCollapsePost()"
+    (likeClick)="onToggleLike($event)" (rerantClick)="onToggleRerant($event)" (bookmarkClick)="onToggleBookmark($event)"
+    (mediaClick)="onOpenMediaModal($event)" />
+  } @else {
+  <!-- Skeletons / spinner while loading single rant -->
+  <div class="feed-detail-loading">
+    <div class="feed-detail-loading__spinner"></div>
+  </div>
+  }
+  } @else {
   <!-- Authenticated: show the compose input -->
   @if (isAuthenticated()) {
   <div class="feed-compose" aria-label="Compose a rant">
@@ -46,8 +69,10 @@
 
     <!-- Real cards -->
     @for (rant of feed.items(); track rant.id) {
+    <!-- Normal card -->
     <app-rant-card [rant]="rant" [readonly]="!isAuthenticated()" (likeClick)="onToggleLike(rant.id)"
-      (rerantClick)="onToggleRerant(rant.id)" (bookmarkClick)="onToggleBookmark(rant.id)"></app-rant-card>
+      (rerantClick)="onToggleRerant(rant.id)" (bookmarkClick)="onToggleBookmark(rant.id)"
+      (contentClick)="onExpandPost(rant.id)" (mediaClick)="onOpenMediaModal(rant.id)" />
     }
 
     <!-- Loading more — single skeleton at the bottom -->
@@ -61,5 +86,6 @@
   <div class="feed-load-more">
     <button class="feed-load-more__btn" (click)="feed.loadNextPage()">Load more</button>
   </div>
+  }
   }
 </section>

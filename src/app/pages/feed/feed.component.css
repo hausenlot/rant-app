@@ -208,3 +208,65 @@
     height: 38px;
   }
 }
+
+/* ── Details Header (Sticky like Twitter) ── */
+.feed-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 0;
+  background: rgba(5, 8, 15, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  z-index: 50;
+  /* margin-bottom: 1rem; */
+}
+
+.feed-detail-header__back {
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.feed-detail-header__back:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.feed-detail-header__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ── Loading Rant Details ── */
+.feed-detail-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+}
+
+.feed-detail-loading__spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
