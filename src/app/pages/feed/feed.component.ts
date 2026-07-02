@@ -82,6 +82,8 @@ interface FeedAdapter {
   templateUrl: './feed.component.html',
   styleUrl: './feed.component.css',
   providers: [
+    // Each FeedComponent instance owns its own context pair. When the
+    // component is destroyed, the contexts are too — clean, no leaks.
     provideFeedContext(),
     provideExploreTimelineContext(),
   ],
@@ -118,9 +120,6 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   /** Track if we're handling a popstate to avoid double-processing. */
   private isHandlingPopState = false;
 
-  /** Track if we're in the middle of a collapse operation */
-  private isCollapsing = false;
-
   windowWidth = 0;
   mainContentWidth = 0;
   feedPageWidth = 0;
@@ -154,6 +153,7 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
     });
 
     // Restore scroll position on initial load — fires once items are rendered.
+    // Direct event handlers (onCollapsePost, handlePopState) handle subsequent restores.
     effect(() => {
       const items = this.feed.items();
       const isLoading = this.feed.isLoading();
@@ -345,10 +345,8 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
 
   /** Handle click on post content - expand. */
   onExpandPost(postId: string): void {
-    // Save current scroll position before expanding
     this.saveScrollPosition();
     this.scrollRestored = false;
-
     this.feed.expandPost(postId);
     this.historyService.pushExpandedPost(postId);
 
@@ -365,45 +363,30 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
     this.saveScrollPosition();
     this.feed.openMediaModal(postId);
     this.historyService.pushMediaModal(postId);
+    // Also open the actual CDK overlay modal
     this.openMediaModalOverlay(postId);
   }
 
   /** Handle close of expanded post (via close button or back navigation). */
+  // onCollapsePost(): void {
+  //   this.feed.collapsePost();
+  //   this.scrollRestored = false;
+  //   this.currentExpandedRant.set(null);
+  //   this.historyService.replaceFeedState(this.feed.getScrollPosition());
+  //   requestAnimationFrame(() => {
+  //     this.restoreScrollPosition();
+  //   });
+  // }
+
   onCollapsePost(): void {
-    // Prevent multiple collapse attempts
-    if (this.isCollapsing) return;
-    this.isCollapsing = true;
-
-    try {
-      // Save current scroll position before collapsing
-      this.saveScrollPosition();
-
-      // Check if we're in a history state that we can go back from
-      const state = this.historyService.getState();
-      if (state?.expandedPostId) {
-        // If we have history state, use browser back
-        // The popstate handler will handle the collapse and scroll restoration
-        this.feed.collapsePost();
-        this.currentExpandedRant.set(null);
-        history.back();
-      } else {
-        // Fallback: collapse directly and restore scroll
-        this.feed.collapsePost();
-        this.currentExpandedRant.set(null);
-        this.historyService.replaceFeedState(this.feed.getScrollPosition());
-
-        // Restore scroll after DOM update
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            this.restoreScrollPosition();
-            this.isCollapsing = false;
-          }, 50);
-        });
-      }
-    } catch (error) {
-      console.error('Error during collapse:', error);
-      // Ensure we reset the collapsing flag even on error
-      this.isCollapsing = false;
+    this.saveScrollPosition(); // Save current position
+    if (this.historyService.isExpandedPostState()) {
+      history.back(); // Let popstate handle the rest
+    } else {
+      // Fallback if not in history state
+      this.feed.collapsePost();
+      this.currentExpandedRant.set(null);
+      this.restoreScrollPosition();
     }
   }
 
@@ -413,16 +396,14 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
     this.scrollRestored = false;
     this.historyService.replaceFeedState(this.feed.getScrollPosition());
     requestAnimationFrame(() => {
-      setTimeout(() => {
-        this.restoreScrollPosition();
-      }, 50);
+      this.restoreScrollPosition();
     });
   }
 
-  /** Handle click on quote rant. */
+  /** Handle click on test button. */
   onQuoteClick(postId: string): void {
+    // console.log("test")
     this.saveScrollPosition();
-    this.scrollRestored = false;
     this.feed.expandPost(postId);
     this.historyService.pushExpandedPost(postId);
 
@@ -434,11 +415,13 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  /** Handle click on quote media. */
+  /** Handle click on quote media - open media modal. */
   onQuoteMediaClick(postId: string): void {
+    // console.log(postId)
     this.saveScrollPosition();
     this.feed.openMediaModal(postId);
     this.historyService.pushMediaModal(postId);
+    // Also open the actual CDK overlay modal
     this.openMediaModalOverlay(postId);
   }
 
@@ -453,7 +436,7 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
         // Navigated back to an expanded post - keep it expanded
         this.scrollRestored = false;
         this.feed.expandPost(state.expandedPostId);
-        this.mediaModalService.close();
+        this.mediaModalService.close(); // Make sure media modal is closed
         const found = this.feed.items().find((r) => r.id === state.expandedPostId);
         if (found) {
           this.currentExpandedRant.set(found);
@@ -466,38 +449,42 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
         this.openMediaModalOverlay(state.mediaModalPostId);
       } else {
         // Navigated back to feed - collapse everything and restore scroll
+        // DON'T set scrollRestored to true here - let the restoration happen
+        // this.scrollRestored = true; // ← REMOVE THIS LINE
         this.feed.collapsePost();
         this.feed.closeMediaModal();
-        this.mediaModalService.close();
+        this.mediaModalService.close(); // Make sure media modal is closed
         this.currentExpandedRant.set(null);
-
-        // Reset scroll restored flag to allow restoration
-        this.scrollRestored = false;
-
-        // Restore scroll after DOM update with a slight delay to ensure DOM is ready
+        // Restore scroll after DOM update
         requestAnimationFrame(() => {
-          setTimeout(() => {
-            this.restoreScrollPosition();
-            // Mark as restored after successful restoration
-            this.scrollRestored = true;
-          }, 50);
+          this.restoreScrollPosition();
         });
       }
     } finally {
       this.isHandlingPopState = false;
-      // Reset collapsing flag if it was set
-      this.isCollapsing = false;
     }
   }
 
   /** Open the CDK overlay media modal. */
   private openMediaModalOverlay(postId: string): void {
+    // Find the rant in the current feed items to skip a redundant API call.
+    // But what if its the quote rant? its not in the feed items.
     const rant = this.feed.items().find((r) => r.id === postId) ?? null;
 
+    // Then instead of null, let's try finding it using the rantService
+    // this.rantService.getRant(postId).subscribe({
+    //   next: (rant) => {
+    //     this.currentExpandedRant.set(rant);
+    //   },
+    //   error: (err) => {
+    //     console.error('Failed to load rant for expansion:', err);
+    //   }
     this.mediaModalService.open(
       PostMediaModalComponent,
       { postId },
       (instance) => {
+        // rantData MUST be set before postId so the postId setter sees it
+        // and skips the fetchRant() call.
         if (rant) instance.rantData = rant;
         instance.postId = postId;
       }
@@ -506,21 +493,15 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
 
   /** Save current feed scroll position using window scroll API. */
   private saveScrollPosition(): void {
-    const scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
-    // Only save if we're not in the middle of a collapse operation
-    if (!this.isCollapsing) {
-      this.feed.saveScrollPosition(scrollPos);
-    }
+    const scrollPos = window.scrollY || document.documentElement.scrollTop;
+    this.feed.saveScrollPosition(scrollPos);
   }
 
   /** Restore feed scroll position from saved state. Returns true if scroll was restored. */
   private restoreScrollPosition(): boolean {
     const savedPosition = this.feed.getScrollPosition();
     if (savedPosition > 0) {
-      window.scrollTo({
-        top: savedPosition,
-        behavior: 'instant' // Use instant for immediate scroll
-      });
+      window.scrollTo(0, savedPosition);
       return true;
     }
     return false;
@@ -530,10 +511,7 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   private restoreScrollFromHistory(): boolean {
     const savedPosition = this.historyService.getSavedScrollPosition();
     if (savedPosition !== null && savedPosition > 0) {
-      window.scrollTo({
-        top: savedPosition,
-        behavior: 'instant'
-      });
+      window.scrollTo(0, savedPosition);
       return true;
     }
     return false;
