@@ -121,9 +121,6 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   /** Track if we're in the middle of a collapse operation */
   private isCollapsing = false;
 
-  /** Track if scroll restoration has been initialized */
-  private scrollRestorationInitialized = false;
-
   windowWidth = 0;
   mainContentWidth = 0;
   feedPageWidth = 0;
@@ -165,19 +162,16 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
       // Only restore once on the very first load of the feed (no expanded post)
       if (!isLoading && items.length > 0 && !expandedId && !this.scrollRestored) {
         this.scrollRestored = true;
-        // Use browser's native scroll restoration
-        this.restoreScrollPosition() || this.restoreScrollFromHistory();
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            this.restoreScrollPosition() || this.restoreScrollFromHistory();
+          }, 50);
+        });
       }
     });
   }
 
   ngAfterViewInit() {
-    // Enable manual scroll restoration to prevent browser from auto-restoring
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-      this.scrollRestorationInitialized = true;
-    }
-
     this.updateDimensions();
     this.feed.loadFirstPage();
 
@@ -221,10 +215,6 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Restore default scroll behavior when component is destroyed
-    if (this.scrollRestorationInitialized && 'scrollRestoration' in history) {
-      history.scrollRestoration = 'auto';
-    }
     this.feed.reset();
   }
 
@@ -527,10 +517,9 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   private restoreScrollPosition(): boolean {
     const savedPosition = this.feed.getScrollPosition();
     if (savedPosition > 0) {
-      // Use instant scroll to prevent animation
       window.scrollTo({
         top: savedPosition,
-        behavior: 'instant'
+        behavior: 'instant' // Use instant for immediate scroll
       });
       return true;
     }
