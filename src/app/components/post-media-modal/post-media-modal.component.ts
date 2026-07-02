@@ -58,6 +58,9 @@ export class PostMediaModalComponent implements OnDestroy {
   /** The post being displayed. */
   rant: Rant | null = null;
 
+  /** Loading state for the rant itself. */
+  loadingRant = signal<boolean>(false);  // ← ADD THIS
+
   /** Replies for this post. */
   replies = signal<Reply[]>([]);
 
@@ -76,11 +79,18 @@ export class PostMediaModalComponent implements OnDestroy {
   }
 
   private fetchRant(postId: string): void {
+    this.loadingRant.set(true);  // ← ADD THIS - show loading
     this.rantService.getRant(postId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (rant) => { this.rant = rant; },
-        error: (err) => { console.error('Failed to load rant for media modal:', err); },
+        next: (rant) => {
+          this.rant = rant;
+          this.loadingRant.set(false);  // ← ADD THIS - hide loading
+        },
+        error: (err) => {
+          console.error('Failed to load rant for media modal:', err);
+          this.loadingRant.set(false);  // ← ADD THIS - hide loading on error
+        },
       });
   }
 
@@ -115,6 +125,9 @@ export class PostMediaModalComponent implements OnDestroy {
 
   close(): void {
     if (this.historyService.isMediaModalState()) {
+      // CLOSE THE DAMN MODAL FIRST
+      this.modalService.close();
+      // THEN GO BACK
       history.back();
     } else {
       this.modalService.close();

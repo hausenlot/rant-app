@@ -30,6 +30,10 @@ export class RantCardComponent {
     @Output() contentClick = new EventEmitter<string>();
     /** Emitted when the media (image/video) is clicked - opens media modal. */
     @Output() mediaClick = new EventEmitter<string>();
+    /** Emitted when the quote is clicked */
+    @Output() quoteClick = new EventEmitter<string>();
+    /** Emitted when the quote media is clicked */
+    @Output() quoteMediaClick = new EventEmitter<string>();
 
     /** Track which images have finished loading, keyed by rant id. */
     private loadedImages = new Set<string>();
@@ -134,5 +138,14 @@ export class RantCardComponent {
     onMediaClick(event: MouseEvent): void {
         event.stopPropagation();
         this.mediaClick.emit(this.rant.id);
+    }
+
+    onQuoteClick(event: MouseEvent): void {
+        event.stopPropagation();
+        this.quoteClick.emit(this.rant.quoteRantId);
+    }
+    onQuoteMediaClick(event: MouseEvent): void {
+        event.stopPropagation();
+        this.quoteMediaClick.emit(this.rant.quoteRantId);
     }
 }

@@ -1,7 +1,8 @@
 <section class="page feed-page" #feedPage>
-  @if (feed.expandedPostId()) {
-  <!-- Detailed post view -->
-  <div class="feed-detail-header">
+
+  <!-- Detail view: lazily created on first expand, kept alive after that -->
+  @if (feed.expandedPostId() || hasExpandedOnce()) {
+  <div class="feed-detail-header" [hidden]="!feed.expandedPostId()">
     <button class="feed-detail-header__back" (click)="onCollapsePost()" aria-label="Back to feed">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
         <line x1="19" y1="12" x2="5" y2="12" />
@@ -11,81 +12,75 @@
     <h1 class="feed-detail-header__title">Rant</h1>
   </div>
 
-  @if (currentExpandedRant(); as rant) {
-  <app-rant-expanded [rant]="rant" [readonly]="!isAuthenticated()" (close)="onCollapsePost()"
-    (likeClick)="onToggleLike($event)" (rerantClick)="onToggleRerant($event)" (bookmarkClick)="onToggleBookmark($event)"
-    (mediaClick)="onOpenMediaModal($event)" />
-  } @else {
-  <!-- Skeletons / spinner while loading single rant -->
-  <div class="feed-detail-loading">
-    <div class="feed-detail-loading__spinner"></div>
-  </div>
-  }
-  } @else {
-  <!-- Authenticated: show the compose input -->
-  @if (isAuthenticated()) {
-  <div class="feed-compose" aria-label="Compose a rant">
-    <span class="feed-compose__avatar" aria-hidden="true">Y</span>
-    <input type="text" class="feed-compose__input" placeholder="What's ranting?" aria-label="Compose a rant" />
-  </div>
-  }
-
-  <!-- Unauthenticated: prompt to sign in -->
-  @if (!isAuthenticated()) {
-  <div class="feed-auth-prompt">
-    <p>Sign in to post rants, like, and bookmark.</p>
-    <a routerLink="/auth/sign-in" class="feed-auth-prompt__link">Sign in</a>
-  </div>
-  }
-
-  <!-- Refreshing indicator -->
-  @if (feed.isRefreshing()) {
-  <div class="feed-refresh-bar">Refreshing…</div>
-  }
-
-  <!-- Error state -->
-  @if (feed.hasError()) {
-  <div class="feed-error">
-    {{ feed.error() }}
-    <button class="feed-error__retry" (click)="feed.loadFirstPage()">Retry</button>
-  </div>
-  }
-
-  <!-- Empty feed -->
-  @if (feed.isEmpty()) {
-  <div class="empty-state">
-    <div class="empty-icon" aria-hidden="true">💭</div>
-    <h2>No rants yet</h2>
-    <p>Be the first to rant!</p>
-  </div>
-  }
-
-  <!-- Feed container — shared by skeletons and real cards -->
-  <div class="feed-rants">
-    <!-- Loading (first page) — skeleton cards -->
-    @if (feed.isLoading() && !feed.hasLoadedOnce()) {
-    <app-rant-card-skeleton [count]="5" />
-    }
-
-    <!-- Real cards -->
-    @for (rant of feed.items(); track rant.id) {
-    <!-- Normal card -->
-    <app-rant-card [rant]="rant" [readonly]="!isAuthenticated()" (likeClick)="onToggleLike(rant.id)"
-      (rerantClick)="onToggleRerant(rant.id)" (bookmarkClick)="onToggleBookmark(rant.id)"
-      (contentClick)="onExpandPost(rant.id)" (mediaClick)="onOpenMediaModal(rant.id)" />
-    }
-
-    <!-- Loading more — single skeleton at the bottom -->
-    @if (feed.isLoadingMore()) {
-    <app-rant-card-skeleton [count]="1" />
+  <div [hidden]="!feed.expandedPostId()">
+    @if (currentExpandedRant(); as rant) {
+    <app-rant-expanded [rant]="rant" [readonly]="!isAuthenticated()" (close)="onCollapsePost()"
+      (likeClick)="onToggleLike($event)" (rerantClick)="onToggleRerant($event)"
+      (bookmarkClick)="onToggleBookmark($event)" (mediaClick)="onOpenMediaModal($event)" />
+    } @else {
+    <div class="feed-detail-loading">
+      <div class="feed-detail-loading__spinner"></div>
+    </div>
     }
   </div>
+  }
 
-  <!-- Load more -->
-  @if (feed.items().length > 0 && feed.hasMore() && !feed.isLoadingMore()) {
-  <div class="feed-load-more">
-    <button class="feed-load-more__btn" (click)="feed.loadNextPage()">Load more</button>
+  <!-- Feed list: ALWAYS mounted, just hidden while a post is expanded -->
+  <div class="feed-list-wrapper" [hidden]="!!feed.expandedPostId()">
+    @if (isAuthenticated()) {
+    <div class="feed-compose" aria-label="Compose a rant">
+      <span class="feed-compose__avatar" aria-hidden="true">Y</span>
+      <input type="text" class="feed-compose__input" placeholder="What's ranting?" aria-label="Compose a rant" />
+    </div>
+    }
+
+    @if (!isAuthenticated()) {
+    <div class="feed-auth-prompt">
+      <p>Sign in to post rants, like, and bookmark.</p>
+      <a routerLink="/auth/sign-in" class="feed-auth-prompt__link">Sign in</a>
+    </div>
+    }
+
+    @if (feed.isRefreshing()) {
+    <div class="feed-refresh-bar">Refreshing…</div>
+    }
+
+    @if (feed.hasError()) {
+    <div class="feed-error">
+      {{ feed.error() }}
+      <button class="feed-error__retry" (click)="feed.loadFirstPage()">Retry</button>
+    </div>
+    }
+
+    @if (feed.isEmpty()) {
+    <div class="empty-state">
+      <div class="empty-icon" aria-hidden="true">💭</div>
+      <h2>No rants yet</h2>
+      <p>Be the first to rant!</p>
+    </div>
+    }
+
+    <div class="feed-rants">
+      @if (feed.isLoading() && !feed.hasLoadedOnce()) {
+      <app-rant-card-skeleton [count]="5" />
+      }
+
+      @for (rant of feed.items(); track rant.id) {
+      <app-rant-card [rant]="rant" [readonly]="!isAuthenticated()" (likeClick)="onToggleLike(rant.id)"
+        (rerantClick)="onToggleRerant(rant.id)" (bookmarkClick)="onToggleBookmark(rant.id)"
+        (contentClick)="onExpandPost(rant.id)" (mediaClick)="onOpenMediaModal(rant.id)"
+        (quoteClick)="onQuoteClick(rant.quoteRantId!)" (quoteMediaClick)="onQuoteMediaClick(rant.quoteRantId!)" />
+      }
+
+      @if (feed.isLoadingMore()) {
+      <app-rant-card-skeleton [count]="1" />
+      }
+    </div>
+
+    @if (feed.items().length > 0 && feed.hasMore() && !feed.isLoadingMore()) {
+    <div class="feed-load-more">
+      <button class="feed-load-more__btn" (click)="feed.loadNextPage()">Load more</button>
+    </div>
+    }
   </div>
-  }
-  }
 </section>

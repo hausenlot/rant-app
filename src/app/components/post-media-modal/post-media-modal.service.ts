@@ -84,6 +84,7 @@ export class PostMediaModalService {
   close(): void {
     if (!this.overlayRef) return;
 
+    // Detach and dispose first
     this.overlayRef.detach();
     this.overlayRef.dispose();
     this.overlayRef = null;
@@ -92,6 +93,7 @@ export class PostMediaModalService {
     // Restore body scroll
     document.body.style.overflow = '';
 
+    // Emit closed event
     this.closed$.next();
   }
 

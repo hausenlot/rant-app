@@ -13,6 +13,7 @@
     min-width: 0;
     /* Prevent flex item from expanding */
     flex: 1 1 auto;
+    cursor: pointer;
 }
 
 .rant-card:hover {
@@ -233,7 +234,7 @@
 .rant-card__quote-image {
     width: 100%;
     height: auto;
-    /* max-height: 280px; */
+    max-height: 50vh;
     object-fit: cover;
     display: block;
     border-radius: var(--radius-sm, 8px);
@@ -307,7 +308,7 @@
 .rant-card__image {
     width: 100%;
     height: auto;
-    /* max-height: 400px; */
+    max-height: 50vh;
     object-fit: cover;
     display: block;
     border-radius: var(--radius-md, 10px);
