@@ -11,21 +11,17 @@ import {
   effect,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { RantCardComponent } from '../../components/rant-card/rant-card.component';
 import { RantCardSkeletonComponent } from '../../components/rant-card/rant-card-skeleton.component';
 import { RantExpandedComponent } from '../../components/rant-card/rant-expanded.component';
 import { PostMediaModalComponent } from '../../components/post-media-modal/post-media-modal.component';
-import { AUTH_CONTEXT, AuthContext } from '../../contexts/auth.context';
+import { AUTH_CONTEXT } from '../../contexts/auth.context';
 import {
   FEED_CONTEXT,
-  FeedContext,
-  provideFeedContext,
 } from '../../contexts/feed.context';
 import {
   EXPLORE_TIMELINE_CONTEXT,
-  ExploreTimelineContext,
-  provideExploreTimelineContext,
 } from '../../contexts/explore-timeline.context';
 import type { Rant } from '../../models/rant.model';
 import { HistoryService } from '../../services/history.service';
@@ -81,12 +77,6 @@ interface FeedAdapter {
   imports: [RantCardComponent, RantCardSkeletonComponent, RantExpandedComponent, RouterLink],
   templateUrl: './feed.component.html',
   styleUrl: './feed.component.css',
-  providers: [
-    // Each FeedComponent instance owns its own context pair. When the
-    // component is destroyed, the contexts are too — clean, no leaks.
-    provideFeedContext(),
-    provideExploreTimelineContext(),
-  ],
 })
 export class FeedComponent implements AfterViewInit, OnDestroy {
   private readonly authCtx = inject(AUTH_CONTEXT);
@@ -95,6 +85,8 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   private readonly historyService = inject(HistoryService);
   private readonly mediaModalService = inject(PostMediaModalService);
   private readonly rantService = inject(RantService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   /** True when the user is signed in. */
   readonly isAuthenticated = this.authCtx.derived.isAuthenticated;
@@ -111,20 +103,28 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
 
   readonly hasExpandedOnce = signal(false);
 
-  /** Track if scroll position has been restored for the current feed list view. */
-  private scrollRestored = false;
+  // Compose rant state
+  readonly currentUser = computed(() => this.authCtx.state().currentUser);
+  readonly rantContent = signal('');
+  readonly selectedFile = signal<File | null>(null);
+  readonly selectedFilePreview = signal<string | null>(null);
+  readonly isSubmitting = signal(false);
 
   /** Track previous auth state to detect transitions. */
   private previousAuthState = this.isAuthenticated();
 
-  /** Track if we're handling a popstate to avoid double-processing. */
-  private isHandlingPopState = false;
+  /** Unsubscribe from popstate handler on destroy. */
+  private unsubPopState?: () => void;
 
   windowWidth = 0;
   mainContentWidth = 0;
   feedPageWidth = 0;
 
   @ViewChild('feedPage', { static: false }) feedPageRef!: ElementRef;
+  @ViewChild(RantExpandedComponent) expandedComponent?: RantExpandedComponent;
+  @ViewChild('rantInput', { static: false }) rantInputRef?: ElementRef<HTMLTextAreaElement>;
+
+  private queryParamsSub?: any;
 
   constructor() {
     // When auth state changes (login/logout), reset stale context + reload.
@@ -143,37 +143,27 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
     });
 
     // Listen for browser back/forward navigation
-    this.historyService.onPopState(() => this.handlePopState());
+    this.unsubPopState = this.historyService.onPopState(() => this.handlePopState());
 
     // Subscribe to media modal close from the modal itself
     this.mediaModalService.closed$.subscribe(() => {
-      if (!this.isHandlingPopState) {
-        this.onMediaModalClosed();
-      }
-    });
-
-    // Restore scroll position on initial load — fires once items are rendered.
-    // Direct event handlers (onCollapsePost, handlePopState) handle subsequent restores.
-    effect(() => {
-      const items = this.feed.items();
-      const isLoading = this.feed.isLoading();
-      const expandedId = this.feed.expandedPostId();
-
-      // Only restore once on the very first load of the feed (no expanded post)
-      if (!isLoading && items.length > 0 && !expandedId && !this.scrollRestored) {
-        this.scrollRestored = true;
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            this.restoreScrollPosition() || this.restoreScrollFromHistory();
-          }, 50);
-        });
-      }
+      this.onMediaModalClosed();
     });
   }
 
   ngAfterViewInit() {
     this.updateDimensions();
-    this.feed.loadFirstPage();
+
+    // Resume-aware: only load if context has no valid cached data.
+    // If the feed already has items (returned from another route), skip the API call
+    // and just restore the scroll position.
+    const shouldLoad = this.isAuthenticated()
+      ? !this.feedCtx.hasData()
+      : !this.exploreCtx.hasData();
+
+    if (shouldLoad) {
+      this.feed.loadFirstPage();
+    }
 
     // Check if there is an initial expanded post in history or URL hash
     const state = this.historyService.getState();
@@ -197,9 +187,43 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
     } else if (initialMediaPostId) {
       this.feed.openMediaModal(initialMediaPostId);
       this.openMediaModalOverlay(initialMediaPostId);
-    } else {
-      this.restoreScrollFromHistory();
+    } else if (!shouldLoad) {
+      // Feed already loaded — restore scroll position from context
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          this.restoreScrollPosition();
+        }, 50);
+      });
     }
+
+    // Listen for query parameters to trigger focus/compose state
+    this.queryParamsSub = this.route.queryParams.subscribe(params => {
+      if (params['compose'] === 'true') {
+        this.triggerComposeFocus();
+      }
+    });
+  }
+
+  private triggerComposeFocus() {
+    // 1. Collapse any expanded post so the feed-list is visible (which contains the compose box)
+    if (this.feed.expandedPostId()) {
+      this.feed.collapsePost();
+      this.currentExpandedRant.set(null);
+    }
+    // 2. Clear query param so it doesn't trigger again on reload or back/forward
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { compose: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+    // 3. Focus the element after a short timeout to let the UI update
+    setTimeout(() => {
+      if (this.rantInputRef) {
+        this.rantInputRef.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        this.rantInputRef.nativeElement.focus();
+      }
+    }, 100);
   }
 
   private loadRantForExpansion(postId: string): void {
@@ -215,7 +239,9 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.feed.reset();
+    this.unsubPopState?.();
+    this.queryParamsSub?.unsubscribe();
+    this.saveScrollPosition();
   }
 
   /* ──────────────────────────── Auth transition ──────────────────────────── */
@@ -346,7 +372,6 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   /** Handle click on post content - expand. */
   onExpandPost(postId: string): void {
     this.saveScrollPosition();
-    this.scrollRestored = false;
     this.feed.expandPost(postId);
     this.historyService.pushExpandedPost(postId);
 
@@ -368,33 +393,27 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
   }
 
   /** Handle close of expanded post (via close button or back navigation). */
-  // onCollapsePost(): void {
-  //   this.feed.collapsePost();
-  //   this.scrollRestored = false;
-  //   this.currentExpandedRant.set(null);
-  //   this.historyService.replaceFeedState(this.feed.getScrollPosition());
-  //   requestAnimationFrame(() => {
-  //     this.restoreScrollPosition();
-  //   });
-  // }
-
   onCollapsePost(): void {
-    this.saveScrollPosition(); // Save current position
+    if (this.expandedComponent && this.expandedComponent.threadHistory().length > 0) {
+      this.expandedComponent.navigateBack();
+      return;
+    }
+
     if (this.historyService.isExpandedPostState()) {
       history.back(); // Let popstate handle the rest
     } else {
       // Fallback if not in history state
       this.feed.collapsePost();
       this.currentExpandedRant.set(null);
-      this.restoreScrollPosition();
+      requestAnimationFrame(() => {
+        this.restoreScrollPosition();
+      });
     }
   }
 
   /** Handle close of media modal. */
   onMediaModalClosed(): void {
     this.feed.closeMediaModal();
-    this.scrollRestored = false;
-    this.historyService.replaceFeedState(this.feed.getScrollPosition());
     requestAnimationFrame(() => {
       this.restoreScrollPosition();
     });
@@ -427,41 +446,31 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
 
   /** Handle browser back/forward navigation. */
   private handlePopState(): void {
-    this.isHandlingPopState = true;
+    const state = this.historyService.getState();
 
-    try {
-      const state = this.historyService.getState();
-
-      if (state?.expandedPostId) {
-        // Navigated back to an expanded post - keep it expanded
-        this.scrollRestored = false;
-        this.feed.expandPost(state.expandedPostId);
-        this.mediaModalService.close(); // Make sure media modal is closed
-        const found = this.feed.items().find((r) => r.id === state.expandedPostId);
-        if (found) {
-          this.currentExpandedRant.set(found);
-        } else {
-          this.loadRantForExpansion(state.expandedPostId);
-        }
-      } else if (state?.mediaModalPostId) {
-        // Navigated back to a media modal - open it
-        this.feed.openMediaModal(state.mediaModalPostId);
-        this.openMediaModalOverlay(state.mediaModalPostId);
+    if (state?.expandedPostId) {
+      // Navigated back to an expanded post — keep it expanded
+      this.feed.expandPost(state.expandedPostId);
+      this.mediaModalService.close();
+      const found = this.feed.items().find((r) => r.id === state.expandedPostId);
+      if (found) {
+        this.currentExpandedRant.set(found);
       } else {
-        // Navigated back to feed - collapse everything and restore scroll
-        // DON'T set scrollRestored to true here - let the restoration happen
-        // this.scrollRestored = true; // ← REMOVE THIS LINE
-        this.feed.collapsePost();
-        this.feed.closeMediaModal();
-        this.mediaModalService.close(); // Make sure media modal is closed
-        this.currentExpandedRant.set(null);
-        // Restore scroll after DOM update
-        requestAnimationFrame(() => {
-          this.restoreScrollPosition();
-        });
+        this.loadRantForExpansion(state.expandedPostId);
       }
-    } finally {
-      this.isHandlingPopState = false;
+    } else if (state?.mediaModalPostId) {
+      // Navigated back to a media modal — open it
+      this.feed.openMediaModal(state.mediaModalPostId);
+      this.openMediaModalOverlay(state.mediaModalPostId);
+    } else {
+      // Navigated back to feed — collapse everything, restore scroll
+      this.feed.collapsePost();
+      this.feed.closeMediaModal();
+      this.mediaModalService.close();
+      this.currentExpandedRant.set(null);
+      requestAnimationFrame(() => {
+        this.restoreScrollPosition();
+      });
     }
   }
 
@@ -507,17 +516,28 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
     return false;
   }
 
-  /** Restore scroll position from history state on initial load. Returns true if restored. */
-  private restoreScrollFromHistory(): boolean {
-    const savedPosition = this.historyService.getSavedScrollPosition();
-    if (savedPosition !== null && savedPosition > 0) {
-      window.scrollTo(0, savedPosition);
-      return true;
-    }
-    return false;
-  }
+
 
   /* ──────────────────────────── Template helpers ──────────────────────────── */
+
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    if (this.feed.expandedPostId()) {
+      return;
+    }
+    if (
+      this.feed.items().length > 0 &&
+      this.feed.hasMore() &&
+      !this.feed.isLoadingMore() &&
+      !this.feed.isLoading()
+    ) {
+      const pos = (window.scrollY || document.documentElement.scrollTop) + window.innerHeight;
+      const max = document.documentElement.scrollHeight;
+      if (pos >= max - 300) {
+        this.feed.loadNextPage();
+      }
+    }
+  }
 
   @HostListener('window:resize')
   onResize() {
@@ -545,5 +565,106 @@ export class FeedComponent implements AfterViewInit, OnDestroy {
 
   onToggleBookmark(id: string): void {
     this.feed.toggleBookmark?.(id);
+  }
+
+  /* ──────────────────────────── Compose methods ──────────────────────────── */
+
+  readonly MAX_CHARS = 500;
+  private readonly MAX_HEIGHT = 517;
+
+  onInput(textarea: HTMLTextAreaElement): void {
+    // Enforce character limit
+    if (textarea.value.length > this.MAX_CHARS) {
+      textarea.value = textarea.value.slice(0, this.MAX_CHARS);
+    }
+    this.rantContent.set(textarea.value);
+
+    // Auto-resize: reset height then expand to content, capped at MAX_HEIGHT
+    textarea.style.height = 'auto';
+    const newHeight = Math.min(textarea.scrollHeight, this.MAX_HEIGHT);
+    textarea.style.height = newHeight + 'px';
+    textarea.style.overflowY = textarea.scrollHeight > this.MAX_HEIGHT ? 'auto' : 'hidden';
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.selectedFile.set(file);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.selectedFilePreview.set(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeSelectedFile(): void {
+    this.selectedFile.set(null);
+    this.selectedFilePreview.set(null);
+  }
+
+  isPostDisabled(): boolean {
+    const text = this.rantContent().trim();
+    return text.length === 0 || text.length > this.MAX_CHARS;
+  }
+
+  submitRant(textarea: HTMLTextAreaElement): void {
+    if (this.isPostDisabled() || this.isSubmitting()) return;
+
+    this.isSubmitting.set(true);
+
+    const payload = {
+      content: this.rantContent().trim(),
+      mediaFile: this.selectedFile() || undefined
+    };
+
+    this.rantService.createRantWithMedia(payload).subscribe({
+      next: (newRant) => {
+        // Insert new rant at the top
+        this.feedCtx.insertRant(newRant);
+        // Reset compose box state
+        this.rantContent.set('');
+        this.selectedFile.set(null);
+        this.selectedFilePreview.set(null);
+        textarea.value = '';
+        textarea.style.height = 'auto';
+        this.isSubmitting.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to create rant:', err);
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  getAvatarInitials(displayName: string | undefined): string {
+    if (!displayName) return '?';
+    return displayName
+      .split(' ')
+      .map(name => name[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?';
+  }
+
+  getAvatarColor(username?: string): string {
+    const colors = [
+      'linear-gradient(135deg, #6366f1, #8b5cf6)',
+      'linear-gradient(135deg, #ec4899, #f43f5e)',
+      'linear-gradient(135deg, #f59e0b, #f97316)',
+      'linear-gradient(135deg, #10b981, #059669)',
+      'linear-gradient(135deg, #3b82f6, #6366f1)',
+      'linear-gradient(135deg, #8b5cf6, #a855f7)',
+      'linear-gradient(135deg, #ef4444, #dc2626)',
+    ];
+    const seed = username || 'Y';
+    let sum = 0;
+    for (let i = 0; i < seed.length; i++) {
+      sum += seed.charCodeAt(i);
+    }
+    const index = sum % colors.length;
+    return colors[index];
   }
 }

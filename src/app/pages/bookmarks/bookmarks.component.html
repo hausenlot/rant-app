@@ -1,6 +1,39 @@
 <section class="page bookmarks-page">
   <div class="page-header">
     <h1>Bookmarks</h1>
-    <p>Your saved rants for later.</p>
+    <p class="page-header-subtitle">Your saved rants for later.</p>
+  </div>
+
+  <div class="bookmarks-feed">
+    @if (bookmarkCtx.derived.isLoading() && !bookmarkCtx.derived.hasLoadedOnce()) {
+      <app-rant-card-skeleton [count]="5" />
+    }
+
+    @for (item of bookmarkCtx.state().items; track item.id) {
+      <app-rant-card
+        [rant]="item.rant"
+        [readonly]="!isAuthenticated()"
+        (likeClick)="onToggleLike(item.id)"
+        (rerantClick)="onToggleRerant(item.id)"
+        (bookmarkClick)="onToggleBookmark(item.id)"
+        (contentClick)="onExpandPost(item.id)"
+        (mediaClick)="onOpenMediaModal(item.id)"
+        (quoteClick)="onQuoteClick(item.rant.quoteRantId!)"
+        (quoteMediaClick)="onQuoteMediaClick(item.rant.quoteRantId!)"
+        class="bookmarks-feed__card"
+      />
+    } @empty {
+      @if (!bookmarkCtx.derived.isLoading()) {
+        <div class="empty-state">
+          <div class="empty-icon" aria-hidden="true">🔖</div>
+          <h2>Save rants for later</h2>
+          <p>Don’t let the good ones get away! Bookmark rants to find them easily here.</p>
+        </div>
+      }
+    }
+
+    @if (bookmarkCtx.derived.isLoadingMore()) {
+      <app-rant-card-skeleton [count]="1" />
+    }
   </div>
 </section>

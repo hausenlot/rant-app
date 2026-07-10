@@ -1,0 +1,89 @@
+<svg viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#161d27" />
+      <stop offset="100%" stop-color="#070b10" />
+    </linearGradient>
+
+    <!-- Border Gradient -->
+    <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0080" /> <!-- Neon Pink -->
+      <stop offset="100%" stop-color="#00c2ff" /> <!-- Neon Cyan -->
+    </linearGradient>
+
+    <!-- Flame Gradient -->
+    <linearGradient id="flameGradient" x1="0%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#ff0080" /> <!-- Hot Pink base -->
+      <stop offset="60%" stop-color="#ff5e00" /> <!-- Intense Orange -->
+      <stop offset="100%" stop-color="#ffaa00" /> <!-- Warm Yellow tip -->
+    </linearGradient>
+
+    <!-- Sparkle Gradient -->
+    <linearGradient id="sparkleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c2ff" />
+      <stop offset="100%" stop-color="#00ff87" />
+    </linearGradient>
+
+    <!-- Blur Filter for Neon Glow -->
+    <filter id="glowBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <!-- Heavy Glow Filter for Background Elements -->
+    <filter id="heavyGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle with Neon Border -->
+  <circle cx="50" cy="50" r="46" fill="url(#bgGradient)" stroke="url(#borderGradient)" stroke-width="2.5" />
+
+  <!-- Flame (Glow Behind) -->
+  <path d="M 34,72 C 24,72 16,61 17,47 C 18,37 24,31 22,20 C 28,24 33,32 34,39 C 38,34 42,26 48,12 C 50,25 49,36 43,45 C 49,45 53,51 53,58 C 53,66 45,72 34,72 Z" 
+        fill="url(#flameGradient)" 
+        filter="url(#heavyGlow)" 
+        opacity="0.35" />
+
+  <!-- Main Flame -->
+  <path d="M 34,72 C 24,72 16,61 17,47 C 18,37 24,31 22,20 C 28,24 33,32 34,39 C 38,34 42,26 48,12 C 50,25 49,36 43,45 C 49,45 53,51 53,58 C 53,66 45,72 34,72 Z" 
+        fill="url(#flameGradient)" />
+
+  <!-- Letter R - Neon Glow (Behind) -->
+  <path d="M 36,28 L 36,72 M 36,28 C 54,28 62,35 62,46 C 62,56 52,60 36,60 M 46,58 L 59,72" 
+        fill="none" 
+        stroke="#00c2ff" 
+        stroke-width="12" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        filter="url(#heavyGlow)" 
+        opacity="0.6" />
+
+  <!-- Letter R - Mid Glow -->
+  <path d="M 36,28 L 36,72 M 36,28 C 54,28 62,35 62,46 C 62,56 52,60 36,60 M 46,58 L 59,72" 
+        fill="none" 
+        stroke="#00c2ff" 
+        stroke-width="8" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        opacity="0.8" />
+
+  <!-- Letter R - Sharp Core (White) -->
+  <path d="M 36,28 L 36,72 M 36,28 C 54,28 62,35 62,46 C 62,56 52,60 36,60 M 46,58 L 59,72" 
+        fill="none" 
+        stroke="#ffffff" 
+        stroke-width="4.5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" />
+
+  <!-- Top-Right Sparkle -->
+  <path d="M 76,18 Q 76,28 86,28 Q 76,28 76,38 Q 76,28 66,28 Q 76,28 76,18 Z" 
+        fill="url(#sparkleGradient)" 
+        filter="url(#glowBlur)" />
+
+  <!-- Bottom-Right Sparkle -->
+  <path d="M 74,50 Q 74,58 82,58 Q 74,58 74,66 Q 74,58 66,58 Q 74,58 74,50 Z" 
+        fill="url(#sparkleGradient)" 
+        filter="url(#glowBlur)" />
+</svg>

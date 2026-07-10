@@ -49,10 +49,6 @@
       <div class="post-media-modal__user-info">
         <span class="post-media-modal__display-name">{{ rant.displayName }}</span>
         <span class="post-media-modal__username">@{{ rant.username }}</span>
-        <span class="post-media-modal__dot" aria-hidden="true">·</span>
-        <time class="post-media-modal__timestamp" [attr.datetime]="rant.createdAt">
-          {{ formatDate(rant.createdAt) }}
-        </time>
       </div>
     </div>
 
@@ -84,6 +80,13 @@
         }
       </div>
       }
+    </div>
+
+    <div class="post-media-modal__metadata">
+      <time class="post-media-modal__post-time" [attr.datetime]="rant.createdAt"
+        [title]="getFullTime(rant.createdAt)">
+        {{ getLocalTime(rant.createdAt) }}
+      </time>
     </div>
 
     <!-- Post actions -->
@@ -137,23 +140,146 @@
       } @else {
       <ul class="post-media-modal__replies-list" role="list">
         @for (reply of replies(); track reply.id) {
-        <li class="post-media-modal__reply">
-          <div class="post-media-modal__reply-header">
-            <div class="post-media-modal__reply-avatar" [style.background]="getAvatarColor(reply.username)">
-              {{ getAvatarInitials(reply.displayName) }}
+        <li class="post-media-modal__reply-item">
+          <div class="post-media-modal__reply">
+            <!-- Parent reply thread line -->
+            @if (reply.replyCount > 0 && isExpanded(reply.id)) {
+            <div class="post-media-modal__thread-line"></div>
+            }
+
+            <div class="post-media-modal__reply-header">
+              @if (reply.profileImageUrl) {
+              <img [src]="reply.profileImageUrl" class="post-media-modal__reply-avatar-pic" alt="Reply author avatar" />
+              } @else {
+              <div class="post-media-modal__reply-avatar" [style.background]="getAvatarColor(reply.username)">
+                {{ getAvatarInitials(reply.displayName) }}
+              </div>
+              }
+              <div class="post-media-modal__reply-user-info">
+                <span class="post-media-modal__reply-name">{{ reply.displayName }}</span>
+                <span class="post-media-modal__reply-username">@{{ reply.username }}</span>
+                <span class="post-media-modal__reply-dot" aria-hidden="true">·</span>
+                <time class="post-media-modal__reply-time" [attr.datetime]="reply.createdAt">
+                  {{ formatDate(reply.createdAt) }}
+                </time>
+              </div>
             </div>
-            <div class="post-media-modal__reply-user-info">
-              <span class="post-media-modal__reply-name">{{ reply.displayName }}</span>
-              <span class="post-media-modal__reply-username">@{{ reply.username }}</span>
-              <span class="post-media-modal__reply-dot" aria-hidden="true">·</span>
-              <time class="post-media-modal__reply-time" [attr.datetime]="reply.createdAt">
-                {{ formatDate(reply.createdAt) }}
-              </time>
+            <p class="post-media-modal__reply-content">{{ reply.content }}</p>
+
+            @if (reply.mediaUrl) {
+            <div class="post-media-modal__reply-media-container">
+              @if (reply.mediaType === 'image') {
+              <img [src]="reply.mediaUrl" alt="Reply media" class="post-media-modal__reply-media" loading="lazy" />
+              } @else if (reply.mediaType === 'video') {
+              <app-video-player [src]="reply.mediaUrl"></app-video-player>
+              }
             </div>
+            }
+
+            <!-- Reply actions -->
+            <div class="post-media-modal__reply-actions">
+              <button class="post-media-modal__reply-action" [class.active]="reply.isLikedByMe"
+                (click)="onToggleReplyLike(reply); $event.stopPropagation()" aria-label="Like">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+                @if (reply.likeCount > 0) {
+                <span>{{ formatCount(reply.likeCount) }}</span>
+                }
+              </button>
+            </div>
+
+            <!-- View child replies toggle -->
+            @if (reply.replyCount > 0) {
+            <button class="post-media-modal__view-children" (click)="toggleChildReplies(reply); $event.stopPropagation()">
+              @if (isExpanded(reply.id)) {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+              Hide replies
+              } @else {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+              View {{ formatCount(reply.replyCount) }} {{ reply.replyCount === 1 ? 'reply' : 'replies' }}
+              }
+            </button>
+            }
           </div>
-          <p class="post-media-modal__reply-text">{{ reply.content }}</p>
-          @if (reply.mediaUrl) {
-          <img [src]="reply.mediaUrl" alt="Reply media" class="post-media-modal__reply-media" loading="lazy" />
+
+          <!-- Child replies (threaded) -->
+          @if (isExpanded(reply.id)) {
+          <div class="post-media-modal__children">
+            @if (isLoadingChildren(reply.id)) {
+            <div class="post-media-modal__loading-replies">
+              <div class="post-media-modal__loading-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            } @else {
+            @for (child of getChildReplies(reply.id); track child.id; let isLastChild = $last) {
+            <div class="post-media-modal__reply post-media-modal__reply--child">
+              <!-- Child reply thread line -->
+              <div class="post-media-modal__thread-line" [class.post-media-modal__thread-line--last]="isLastChild"></div>
+
+              <div class="post-media-modal__reply-header">
+                @if (child.profileImageUrl) {
+                <img [src]="child.profileImageUrl" class="post-media-modal__reply-avatar-pic" alt="Reply author avatar" />
+                } @else {
+                <div class="post-media-modal__reply-avatar" [style.background]="getAvatarColor(child.username)">
+                  {{ getAvatarInitials(child.displayName) }}
+                </div>
+                }
+                <div class="post-media-modal__reply-user-info">
+                  <span class="post-media-modal__reply-name">{{ child.displayName }}</span>
+                  <span class="post-media-modal__reply-username">@{{ child.username }}</span>
+                  <span class="post-media-modal__reply-dot" aria-hidden="true">·</span>
+                  <time class="post-media-modal__reply-time" [attr.datetime]="child.createdAt">
+                    {{ formatDate(child.createdAt) }}
+                  </time>
+                </div>
+              </div>
+
+              @if (child.parentReplyUsername) {
+              <div class="post-media-modal__replying-to-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12">
+                  <polyline points="9 14 4 9 9 4" />
+                  <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
+                </svg>
+                Replying to <span class="post-media-modal__reply-handle">@{{ child.parentReplyUsername }}</span>
+              </div>
+              }
+
+              <p class="post-media-modal__reply-content">{{ child.content }}</p>
+
+              @if (child.mediaUrl) {
+              <div class="post-media-modal__reply-media-container">
+                @if (child.mediaType === 'image') {
+                <img [src]="child.mediaUrl" alt="Reply media" class="post-media-modal__reply-media" loading="lazy" />
+                } @else if (child.mediaType === 'video') {
+                <app-video-player [src]="child.mediaUrl"></app-video-player>
+                }
+              </div>
+              }
+
+              <!-- Child reply actions -->
+              <div class="post-media-modal__reply-actions">
+                <button class="post-media-modal__reply-action" [class.active]="child.isLikedByMe"
+                  (click)="onToggleReplyLike(child); $event.stopPropagation()" aria-label="Like">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  @if (child.likeCount > 0) {
+                  <span>{{ formatCount(child.likeCount) }}</span>
+                  }
+                </button>
+              </div>
+            </div>
+            }
+            }
+          </div>
           }
         </li>
         }

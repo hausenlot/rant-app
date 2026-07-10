@@ -16,7 +16,8 @@
     @if (currentExpandedRant(); as rant) {
     <app-rant-expanded [rant]="rant" [readonly]="!isAuthenticated()" (close)="onCollapsePost()"
       (likeClick)="onToggleLike($event)" (rerantClick)="onToggleRerant($event)"
-      (bookmarkClick)="onToggleBookmark($event)" (mediaClick)="onOpenMediaModal($event)" />
+      (bookmarkClick)="onToggleBookmark($event)" (mediaClick)="onOpenMediaModal($event)"
+      (quoteClick)="onQuoteClick($event)" (quoteMediaClick)="onQuoteMediaClick($event)" />
     } @else {
     <div class="feed-detail-loading">
       <div class="feed-detail-loading__spinner"></div>
@@ -29,8 +30,62 @@
   <div class="feed-list-wrapper" [hidden]="!!feed.expandedPostId()">
     @if (isAuthenticated()) {
     <div class="feed-compose" aria-label="Compose a rant">
-      <span class="feed-compose__avatar" aria-hidden="true">Y</span>
-      <input type="text" class="feed-compose__input" placeholder="What's ranting?" aria-label="Compose a rant" />
+      <div class="feed-compose__top">
+        @if (currentUser()?.profileImageUrl) {
+        <img [src]="currentUser()?.profileImageUrl" class="feed-compose__avatar-img" alt="User avatar" />
+        } @else {
+        <div class="feed-compose__avatar" [style.background]="getAvatarColor(currentUser()?.username)">
+          {{ getAvatarInitials(currentUser()?.displayName) }}
+        </div>
+        }
+        <div class="feed-compose__input-container">
+          <textarea class="feed-compose__textarea" placeholder="What's happening?" aria-label="Compose a rant" rows="2"
+            maxlength="500" #rantInput (input)="onInput(rantInput)"></textarea>
+
+          @if (selectedFilePreview()) {
+          <div class="feed-compose__media-preview">
+            <img [src]="selectedFilePreview()" alt="Selected media preview" />
+            <button class="feed-compose__media-remove" (click)="removeSelectedFile()" aria-label="Remove media">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          }
+        </div>
+      </div>
+
+      @if (rantContent().length >= 450) {
+      <div class="feed-compose__counter" [class.feed-compose__counter--warn]="rantContent().length >= 480"
+        [class.feed-compose__counter--limit]="rantContent().length >= 500">
+        {{ rantContent().length }}/{{ MAX_CHARS }}
+      </div>
+      }
+
+      <div class="feed-compose__bottom">
+        <div class="feed-compose__actions">
+          <button class="feed-compose__action-btn" (click)="mediaInput.click()" aria-label="Add photo or video">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" width="22" height="22">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </button>
+          <input type="file" #mediaInput accept="image/*,video/*" style="display: none;"
+            (change)="onFileSelected($event)" />
+        </div>
+
+        <button class="feed-compose__post-btn" [disabled]="isPostDisabled() || isSubmitting()"
+          (click)="submitRant(rantInput)">
+          @if (isSubmitting()) {
+          Posting…
+          } @else {
+          Post
+          }
+        </button>
+      </div>
     </div>
     }
 
@@ -77,10 +132,6 @@
       }
     </div>
 
-    @if (feed.items().length > 0 && feed.hasMore() && !feed.isLoadingMore()) {
-    <div class="feed-load-more">
-      <button class="feed-load-more__btn" (click)="feed.loadNextPage()">Load more</button>
-    </div>
-    }
+
   </div>
 </section>

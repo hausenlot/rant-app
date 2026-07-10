@@ -17,17 +17,20 @@
         </filter>
       </defs>
       <!-- primary large blob — upper-left spread -->
-      <circle cx="180" cy="200" r="160" fill="#ff0080" opacity="0.14" filter="url(#blob-blur-lg)" />
+      <circle cx="180" cy="200" r="160" fill="var(--color-primary)" opacity="0.14" filter="url(#blob-blur-lg)" />
       <!-- secondary blob — lower-right -->
-      <circle cx="380" cy="410" r="130" fill="#ff0080" opacity="0.20" filter="url(#blob-blur-md)" />
+      <circle cx="380" cy="410" r="130" fill="var(--color-primary)" opacity="0.20" filter="url(#blob-blur-md)" />
       <!-- small accent drop — upper area -->
-      <circle cx="100" cy="90" r="62" fill="#ff0080" opacity="0.10" filter="url(#blob-blur-sm)" />
+      <circle cx="100" cy="90" r="62" fill="var(--color-like)" opacity="0.10" filter="url(#blob-blur-sm)" />
       <!-- tiny trailing drop — bottom-left -->
-      <circle cx="70" cy="510" r="40" fill="#ff0080" opacity="0.08" filter="url(#blob-blur-sm)" />
+      <circle cx="70" cy="510" r="40" fill="var(--color-like)" opacity="0.08" filter="url(#blob-blur-sm)" />
     </svg>
 
     <div class="auth-hero__content">
-      <span class="auth-hero__logo">Rant</span>
+      <div class="auth-hero__logo-wrap">
+        <img src="rant-icon_vectorized.svg" class="auth-hero__logo-img" alt="Rant Logo" />
+        <span class="auth-hero__logo-text">Rant</span>
+      </div>
       <h2 class="auth-hero__headline">
         Lorem ipsum dolor<br>sit amet, consectetur.
       </h2>

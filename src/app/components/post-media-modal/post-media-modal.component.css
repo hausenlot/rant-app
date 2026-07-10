@@ -41,8 +41,8 @@
 .post-media-modal__close-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
-  color: var(--color-primary, #00ff87);
-  border-color: var(--color-primary, #00ff87);
+  color: var(--color-primary, #00c2ff);
+  border-color: var(--color-primary, #00c2ff);
 }
 
 /* ── Backdrop ── */
@@ -188,6 +188,18 @@
   word-break: break-word;
 }
 
+/* ── Metadata ── */
+.post-media-modal__metadata {
+  padding: 0.5rem 0;
+  flex-shrink: 0;
+}
+
+.post-media-modal__post-time {
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.875rem;
+  cursor: default;
+}
+
 /* ── Quote ── */
 .post-media-modal__quote {
   border-left: 3px solid var(--color-border, rgba(255, 255, 255, 0.1));
@@ -256,7 +268,7 @@
   padding: 0.75rem 0;
   border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
   border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-  margin-bottom: 0.75rem;
+  /* margin-bottom: 0.75rem; */
   flex-shrink: 0;
   flex-wrap: wrap;
 }
@@ -277,17 +289,46 @@
 }
 
 .post-media-modal__action:hover {
-  background: rgba(0, 255, 135, 0.1);
-  color: var(--color-primary, #00ff87);
+  background: rgba(0, 194, 255, 0.08);
+  color: var(--color-primary, #00c2ff);
 }
 
 .post-media-modal__action.active {
-  color: var(--color-primary, #00ff87);
+  color: var(--color-primary, #00c2ff);
 }
 
 .post-media-modal__action.active svg {
-  fill: var(--color-primary, #00ff87);
-  stroke: var(--color-primary, #00ff87);
+  fill: var(--color-primary, #00c2ff);
+  stroke: var(--color-primary, #00c2ff);
+}
+
+/* Specific button styles */
+.post-media-modal__action[aria-label="Like"]:hover {
+  background: var(--color-like-hover, rgba(255, 0, 128, 0.08));
+  color: var(--color-like, #ff0080);
+}
+
+.post-media-modal__action[aria-label="Like"].active {
+  color: var(--color-like, #ff0080);
+}
+
+.post-media-modal__action[aria-label="Like"].active svg {
+  fill: var(--color-like, #ff0080);
+  stroke: var(--color-like, #ff0080);
+}
+
+.post-media-modal__action[aria-label="Re-rant"]:hover {
+  background: var(--color-rerant-hover, rgba(0, 255, 135, 0.08));
+  color: var(--color-rerant, #00ff87);
+}
+
+.post-media-modal__action[aria-label="Re-rant"].active {
+  color: var(--color-rerant, #00ff87);
+}
+
+.post-media-modal__action[aria-label="Re-rant"].active svg {
+  fill: var(--color-rerant, #00ff87);
+  stroke: var(--color-rerant, #00ff87);
 }
 
 .post-media-modal__action svg {
@@ -302,14 +343,16 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
 }
 
 .post-media-modal__replies-title {
-  margin: 0 0 0.75rem;
+  /* margin: 0 0 0.75rem; */
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-text, #dde4f0);
   flex-shrink: 0;
+  /* padding: 0.75rem 1rem 0; */
 }
 
 .post-media-modal__replies-count {
@@ -323,19 +366,24 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+}
+
+.post-media-modal__reply-item {
+  border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
 }
 
 .post-media-modal__reply {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.05));
+  /* gap: 0.375rem;
+  padding: 0.75rem 1rem; */
+  margin: 0;
+  transition: background-color 0.15s ease;
+  position: relative;
 }
 
-.post-media-modal__reply:last-child {
-  border-bottom: none;
+.post-media-modal__reply:hover {
+  background-color: rgba(255, 255, 255, 0.015);
 }
 
 .post-media-modal__reply-header {
@@ -388,11 +436,11 @@
 
 .post-media-modal__reply-time {
   color: var(--color-text-muted, #6e7681);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   flex-shrink: 0;
 }
 
-.post-media-modal__reply-text {
+.post-media-modal__reply-content {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -401,10 +449,164 @@
   padding-left: 36px;
 }
 
+.post-media-modal__reply-media-container {
+  padding-left: 36px;
+  margin-top: 0.25rem;
+}
+
 .post-media-modal__reply-media {
   max-width: 100%;
-  border-radius: 8px;
-  margin-top: 0.375rem;
+  border-radius: var(--radius-sm, 8px);
+}
+
+/* ── Reply Avatar (Profile Image) ── */
+.post-media-modal__reply-avatar-pic {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* ── Reply Action Bar ── */
+.post-media-modal__reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 36px;
+  margin-top: 0.125rem;
+}
+
+.post-media-modal__reply-action {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted, #6e7681);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.375rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.post-media-modal__reply-action:hover {
+  background: rgba(0, 194, 255, 0.08);
+  color: var(--color-primary, #00c2ff);
+}
+
+.post-media-modal__reply-action[aria-label="Like"]:hover {
+  background: var(--color-like-hover, rgba(255, 0, 128, 0.08));
+  color: var(--color-like, #ff0080);
+}
+
+.post-media-modal__reply-action.active {
+  color: var(--color-like, #ff0080);
+}
+
+.post-media-modal__reply-action.active svg {
+  fill: var(--color-like, #ff0080);
+  stroke: var(--color-like, #ff0080);
+}
+
+.post-media-modal__reply-action svg {
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+/* ── View Children Toggle ── */
+.post-media-modal__view-children {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: transparent;
+  border: none;
+  color: var(--color-primary, #00ff87);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  margin-left: 36px;
+  margin-top: 0.125rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.post-media-modal__view-children svg {
+  stroke: currentColor;
+  fill: none;
+}
+
+/* ── Child Replies (Threaded) ── */
+.post-media-modal__children {
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInChildren 0.2s ease-out;
+}
+
+@keyframes fadeInChildren {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post-media-modal__reply--child {
+  padding: 0.75rem 1rem;
+  margin: 0;
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.post-media-modal__reply--child:hover {
+  background-color: rgba(255, 255, 255, 0.015);
+}
+
+/* ── Inline Thread Lines ── */
+.post-media-modal__thread-line {
+  position: absolute;
+  top: 40px;
+  bottom: 0;
+  left: 30px;
+  width: 2px;
+  background-color: var(--color-border, rgba(255, 255, 255, 0.08));
+  z-index: 1;
+}
+
+/* Child reply line spans from very top of item to very bottom of item */
+.post-media-modal__reply--child .post-media-modal__thread-line {
+  top: 0;
+  bottom: 0;
+}
+
+/* Last child reply line stops at the center of its avatar */
+.post-media-modal__reply--child .post-media-modal__thread-line--last {
+  bottom: auto;
+  height: 26px;
+}
+
+/* ── Replying To Label (on child replies) ── */
+.post-media-modal__replying-to-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  color: var(--color-text-muted, #6e7681);
+  padding-left: 36px;
+  margin-bottom: -0.125rem;
+}
+
+.post-media-modal__reply-handle {
+  color: var(--color-primary, #00c2ff);
+  font-weight: 500;
 }
 
 /* ── Loading ── */
@@ -468,7 +670,7 @@
   border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   background: transparent;
-  color: var(--color-primary, #00ff87);
+  color: var(--color-primary, #00c2ff);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;

@@ -26,43 +26,20 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import type { Rant } from '../models/rant.model';
-import type { Reply } from '../models/rant.model';
+import type {
+  Rant,
+  Reply,
+  CreateRantRequest,
+  CreateReplyRequest,
+  CreateRantWithMediaPayload,
+  CreateReplyWithMediaPayload,
+  TrendingHashtag
+} from '../models/rant.model';
 
-/**
- * Body for creating a new rant.
- * IMPORTANT — the backend's create endpoint does NOT bind from JSON. It only binds
- * from form bodies (multipart/form-data or x-www-form-urlencoded). See the
- * service implementation: we send URLSearchParams / FormData, not JSON objects.
- */
-export interface CreateRantRequest {
-  content: string;
-  quoteRantId?: string;
-}
-
-/** Body for creating a reply to a rant (also sends form-encoded). */
-export interface CreateReplyRequest {
-  content: string;
-  parentReplyId?: string;
-}
-
-/** Media upload payload (multipart/form-data). */
-export interface CreateRantWithMediaPayload {
-  content: string;
-  quoteRantId?: string;
-  mediaFile?: File;
-}
-
-/** Body for creating a reply with media. */
-export interface CreateReplyWithMediaPayload {
-  content: string;
-  parentReplyId?: string;
-  mediaFile?: File;
-}
 
 @Injectable({ providedIn: 'root' })
 export class RantService {
-  private readonly baseUrl = 'http://192.168.1.44:5000/api';
+  private readonly baseUrl = '/api';
   private readonly http = inject(HttpClient);
 
   /* ------------------------------- Feed ------------------------------- */
@@ -79,6 +56,17 @@ export class RantService {
   /** Fetch a single rant by id (auth-scoped flags). */
   getRant(id: string): Observable<Rant> {
     return this.http.get<Rant>(`${this.baseUrl}/rants/${id}`);
+  }
+
+  /** Fetch trending hashtags from the backend. */
+  getTrendingHashtags(): Observable<TrendingHashtag[]> {
+    return this.http.get<TrendingHashtag[]>(`${this.baseUrl}/rants/trending`);
+  }
+
+  /** Search for rants matching a query term or hashtag. */
+  searchRants(query: string, page = 1, pageSize = 10): Observable<Rant[]> {
+    const params = new HttpParams({ fromObject: { q: query, page: String(page), pageSize: String(pageSize) } });
+    return this.http.get<Rant[]>(`${this.baseUrl}/rants/search`, { params });
   }
 
   /* ------------------------------- CRUD ------------------------------- */
@@ -132,10 +120,16 @@ export class RantService {
 
   /* ------------------------------ Replies ----------------------------- */
 
-  /** Fetch replies for a rant (flat array). */
+  /** Fetch top-level replies for a rant. */
   getReplies(rantId: string, page = 1, pageSize = 10): Observable<Reply[]> {
     const params = new HttpParams({ fromObject: { page: String(page), pageSize: String(pageSize) } });
     return this.http.get<Reply[]>(`${this.baseUrl}/rants/${rantId}/replies`, { params });
+  }
+
+  /** Fetch child replies (sub-replies) for a specific reply. */
+  getChildReplies(replyId: string, page = 1, pageSize = 10): Observable<Reply[]> {
+    const params = new HttpParams({ fromObject: { page: String(page), pageSize: String(pageSize) } });
+    return this.http.get<Reply[]>(`${this.baseUrl}/replies/${replyId}/replies`, { params });
   }
 
   /**

@@ -1,0 +1,13 @@
+<div class="rp-card">
+  <h2 class="rp-card-title">What's trending</h2>
+
+  @for (trend of trends(); track trend.tag) {
+  <div class="rp-trend-item" (click)="onTagClick(trend.tag)" style="cursor: pointer;">
+    <span class="rp-trend-cat">{{ trend.category }}</span>
+    <span class="rp-trend-tag">{{ trend.tag }}</span>
+    <span class="rp-trend-count">{{ trend.count === 1 ? '1 rant' : trend.count + ' rants' }}</span>
+  </div>
+  }
+
+  <button class="rp-show-more" (click)="showMoreTrends()">Show more</button>
+</div>

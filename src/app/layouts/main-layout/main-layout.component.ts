@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { RightPanel } from '../../components/right-panel/right-panel.component';
 
@@ -8,14 +8,16 @@ import { RightPanel } from '../../components/right-panel/right-panel.component';
   standalone: true,
   imports: [RouterOutlet, SidebarComponent, RightPanel],
   template: `
-    <div class="app-shell">
+    <div class="app-shell" [class.is-messages]="isMessagesPage()">
       <app-sidebar />
       <main class="main-content">
         <router-outlet />
       </main>
-      <aside class="right-panel-wrapper">
-        <app-right-panel />
-      </aside>
+      @if (!isMessagesPage()) {
+        <aside class="right-panel-wrapper">
+          <app-right-panel />
+        </aside>
+      }
     </div>
   `,
   styles: [`
@@ -46,6 +48,13 @@ import { RightPanel } from '../../components/right-panel/right-panel.component';
       max-width: 600px;
       width: 600px;
       box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    .app-shell.is-messages .main-content {
+      flex: 0 0 950px;
+      max-width: 950px;
+      width: 950px;
     }
 
     .right-panel-wrapper {
@@ -63,6 +72,13 @@ import { RightPanel } from '../../components/right-panel/right-panel.component';
         flex-direction: column;
         max-width: 100%;
         padding-bottom: 68px;
+      }
+
+      .app-shell.is-messages {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        padding-bottom: 60px;
       }
 
       .app-shell > app-sidebar {
@@ -85,10 +101,24 @@ import { RightPanel } from '../../components/right-panel/right-panel.component';
         min-height: calc(100vh - 68px);
       }
 
+      .app-shell.is-messages .main-content {
+        flex: 1 1 auto;
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        min-height: unset;
+      }
+
       .right-panel-wrapper {
         display: none;
       }
     }
   `]
 })
-export class MainLayoutComponent { }
+export class MainLayoutComponent {
+  private readonly router = inject(Router);
+
+  isMessagesPage(): boolean {
+    return this.router.url.includes('/messages');
+  }
+}

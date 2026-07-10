@@ -1,11 +1,47 @@
-<div class="explore-feed">
-  @for (user of users(); track user.username) {
-    <app-explore-user-card [user]="user" class="explore-feed__card" />
-  } @empty {
-    <div class="empty-state">
-      <div class="empty-icon">👥</div>
-      <h2>No suggestions yet</h2>
-      <p>Suggested accounts will appear here.</p>
+<div class="explore-for-you-container">
+  <!-- Follow Suggestions Section -->
+  @if (suggestedUsers().length > 0) {
+  <section class="explore-suggestions">
+    <h2 class="explore-suggestions__title">Who to follow</h2>
+    <div class="explore-suggestions__list">
+      @for (user of suggestedUsers(); track user.id) {
+      <app-explore-user-card [user]="user" (followToggle)="onFollowToggle(user)"
+        (cardClick)="onUserCardClick(user.username)" class="explore-suggestions__card" />
+      }
     </div>
+  </section>
   }
+
+  <!-- Posts Feed Section -->
+  <section class="explore-posts-section">
+    @if (suggestedUsers().length > 0) {
+    <h2 class="explore-posts-title">Rants from the community</h2>
+    }
+
+    <div class="explore-feed">
+      @if (exploreCtx.derived.isLoading() && !exploreCtx.derived.hasLoadedOnce()) {
+      <app-rant-card-skeleton [count]="5" />
+      }
+
+      @for (rant of exploreCtx.state().items; track rant.id) {
+      <app-rant-card [rant]="rant" [readonly]="!isAuthenticated()" (likeClick)="onToggleLike(rant.id)"
+        (rerantClick)="onToggleRerant(rant.id)" (bookmarkClick)="onToggleBookmark(rant.id)"
+        (contentClick)="onExpandPost(rant.id)" (mediaClick)="onOpenMediaModal(rant.id)"
+        (quoteClick)="onQuoteClick(rant.quoteRantId!)" (quoteMediaClick)="onQuoteMediaClick(rant.quoteRantId!)"
+        class="explore-feed__card" />
+      } @empty {
+      @if (!exploreCtx.derived.isLoading()) {
+      <div class="empty-state">
+        <div class="empty-icon" aria-hidden="true">💭</div>
+        <h2>No rants yet</h2>
+        <p>Community rants will appear here.</p>
+      </div>
+      }
+      }
+
+      @if (exploreCtx.derived.isLoadingMore()) {
+      <app-rant-card-skeleton [count]="1" />
+      }
+    </div>
+  </section>
 </div>

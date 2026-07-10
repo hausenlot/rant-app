@@ -30,10 +30,10 @@ import {
   signal,
   DestroyRef,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { AuthService, LoginRequest, RegisterRequest } from '../services/auth.service';
-import type { AuthUser } from '../models/auth.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthService } from '../services/auth.service';
+import type { AuthUser, LoginRequest, RegisterRequest } from '../models/auth.model';
 
 /* --------------------------------- State --------------------------------- */
 
@@ -190,7 +190,7 @@ export class AuthContext {
     if (typeof err === 'string') return err;
     if (err instanceof Error) {
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-        return 'Network unreachable — is the API running at 192.168.1.44:5000?';
+        return 'Network unreachable — please check if the backend API is running.';
       }
       if (err.message.toLowerCase().includes('400') || err.message.toLowerCase().includes('validation')) {
         return 'Invalid credentials or missing fields.';

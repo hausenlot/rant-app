@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 export interface HistoryState {
   expandedPostId?: string;
   mediaModalPostId?: string;
-  scrollPosition?: number;
   [key: string]: unknown;
 }
 
@@ -12,7 +11,7 @@ export interface HistoryState {
  * --------------
  * Thin wrapper around the browser History API for managing feed navigation state.
  * Pushes state for in-place post expansion and media modal open/close so that
- * the browser back button restores the feed at the exact scroll position.
+ * the browser back button can close modals and expanded posts.
  */
 @Injectable({ providedIn: 'root' })
 export class HistoryService {
@@ -44,11 +43,7 @@ export class HistoryService {
     history.pushState(state, '', url);
   }
 
-  /** Replace current history entry (e.g., after restoring scroll). */
-  replaceFeedState(scrollPosition: number): void {
-    const state: HistoryState = { scrollPosition };
-    history.replaceState(state, '', location.pathname);
-  }
+
 
   /** Get current history state. */
   getState(): HistoryState | null {
@@ -75,9 +70,4 @@ export class HistoryService {
     return history.state?.mediaModalPostId ?? null;
   }
 
-  /** Get saved scroll position from current history state. */
-  getSavedScrollPosition(): number | null {
-    const pos = history.state?.scrollPosition;
-    return typeof pos === 'number' ? pos : null;
-  }
 }

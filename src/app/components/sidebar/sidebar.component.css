@@ -32,6 +32,12 @@
   line-height: 1;
 }
 
+.brand-logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
 .brand-name {
   font-size: 1.25rem;
   font-weight: 800;
@@ -322,7 +328,62 @@
 
   /* Hide username / handle / more menu in the bottom nav */
   .user-info,
-  .user-more {
+  .user-more,
+  .btn-logout-sidebar-compact {
+    display: none;
+  }
+}
+
+/* ─── Notification Badge ───────────────────────────────────── */
+.nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--color-like, #ff0080);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 0 10px var(--color-like-glow, rgba(255, 0, 128, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  line-height: 1;
+}
+
+/* ─── Logout Button ─────────────────────────────────────────── */
+.btn-logout-sidebar-compact {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.btn-logout-sidebar-compact:hover {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+}
+
+.btn-logout-sidebar-compact svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 768px) {
+  .btn-logout-sidebar-compact {
     display: none;
   }
 }

@@ -54,7 +54,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   );
 };
 
-/** True when the request is targeting our API (relative /api path). */
+/** True when the request is targeting our API (relative /api path or backend IP). */
 function isAppApiUrl(url: string): boolean {
-  return url.startsWith('/api') || url.includes('/api/');
+  return url.startsWith('/api') || url.includes('/api') || url.startsWith('/hubs') || url.includes('/hubs');
 }

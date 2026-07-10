@@ -1,11 +1,33 @@
 <div class="explore-feed">
-  @for (topic of topics(); track topic.tag) {
-    <app-explore-topic-card [topic]="topic" class="explore-feed__card" />
+  @if (isLoading() && rants().length === 0) {
+    <app-rant-card-skeleton [count]="5" />
+  }
+
+  @for (rant of rants(); track rant.id) {
+    <app-rant-card
+      [rant]="rant"
+      [readonly]="!isAuthenticated()"
+      (likeClick)="onToggleLike(rant.id)"
+      (rerantClick)="onToggleRerant(rant.id)"
+      (bookmarkClick)="onToggleBookmark(rant.id)"
+      (contentClick)="onExpandPost(rant.id)"
+      (mediaClick)="onOpenMediaModal(rant.id)"
+      (quoteClick)="onQuoteClick(rant.quoteRantId!)"
+      (quoteMediaClick)="onQuoteMediaClick(rant.quoteRantId!)"
+      class="explore-feed__card"
+    />
   } @empty {
-    <div class="empty-state">
-      <div class="empty-icon">🎮</div>
-      <h2>No game topics yet</h2>
-      <p>Game-related hashtags will appear here.</p>
-    </div>
+    @if (!isLoading()) {
+      <div class="empty-state">
+        <div class="empty-icon">🎮</div>
+        <h2>No game posts yet</h2>
+        <p>Posts with #gaming will appear here.</p>
+      </div>
+    }
+  }
+
+  @if (isLoadingMore()) {
+    <app-rant-card-skeleton [count]="1" />
   }
 </div>
+

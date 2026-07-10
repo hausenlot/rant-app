@@ -15,34 +15,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
-import type { AuthUser } from '../models/auth.model';
+import type { AuthUser, LoginRequest, RegisterRequest, AuthResponse } from '../models/auth.model';
 
-/** Login request body. */
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-/** Register request body. */
-export interface RegisterRequest {
-  username: string;
-  password: string;
-  displayName: string;
-}
-
-/** Raw login/register response envelope from the API. */
-interface AuthResponse {
-  token: string;
-  user?: AuthUser;
-  id?: string;
-  username?: string;
-  displayName?: string;
-  profileImageUrl?: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly baseUrl = 'http://192.168.1.44:5000/api/auth';
+  private readonly baseUrl = '/api/auth';
   private readonly http = inject(HttpClient);
 
   /** Canonical storage key for the bearer token (also read by the auth interceptor). */

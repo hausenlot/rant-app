@@ -14,28 +14,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import type { Rant } from '../models/rant.model';
-
-/**
- * Component-facing envelope for a paginated timeline page.
- * Exposes a uniform shape so consumers don't care how the backend packages pages.
- */
-export interface TimelinePage {
-  items: Rant[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-/** Parameters for a single paginated fetch against the explore timeline. */
-export interface TimelineQuery {
-  page: number;     // 1-based page index
-  pageSize: number; // items per page
-}
+import type { TimelinePage, TimelineQuery } from '../models/timeline.model';
 
 @Injectable({ providedIn: 'root' })
 export class TimelineService {
   /** App-wide API root. All service URLs resolve against this. */
-  private readonly baseUrl = 'http://192.168.1.44:5000/api';
+  private readonly baseUrl = '/api';
 
   /** Angular's HTTP client; no auth config needed for the public explore endpoint. */
   private readonly http = inject(HttpClient);

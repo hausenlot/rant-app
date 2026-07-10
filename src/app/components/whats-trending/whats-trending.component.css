@@ -1,0 +1,68 @@
+/* whats-trending.component.css */
+:host {
+  display: block;
+}
+
+.rp-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rp-card-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 12px 0;
+}
+
+.rp-trend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.rp-trend-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rp-trend-cat {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.rp-trend-tag {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.rp-trend-count {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.rp-show-more {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px 8px 4px;
+  transition: color var(--transition);
+  outline: none;
+  font-family: inherit;
+}
+
+.rp-show-more:hover {
+  opacity: 0.8;
+}

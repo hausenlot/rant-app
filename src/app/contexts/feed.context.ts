@@ -2,12 +2,16 @@
  * FeedContext
  * -----------
  * Signal-based Context (state + provider + hook) for the authenticated home feed.
+ * Registered as a **singleton** at the app root so feed data persists across
+ * route navigations. The feed is only reset on manual refresh, auth change,
+ * or when the 12-hour TTL expires.
  *
  * Owns:
  *   - the cumulative rant list (`items`) loaded from /timelines/home plus a lookup map
  *     (rantMap) for O(1) access by id
  *   - pagination (`page`, `pageSize`, `hasMore`)
  *   - lifecycle flags (`status`, `error`)
+ *   - session TTL (`lastLoadedAt`, 12-hour expiry)
  *
  * Actions:
  *   - `loadFirstPage(pageSize?)` — reset + fetch (mount / refresh)
@@ -35,15 +39,16 @@ import {
   computed,
   inject,
   signal,
-  DestroyRef,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, takeUntil } from 'rxjs';
 import { RantService } from '../services/rant.service';
 import type { Rant } from '../models/rant.model';
 
 /* --------------------------------- State --------------------------------- */
 
 export const FEED_DEFAULT_PAGE_SIZE = 10;
+/** Feed session expires after 12 hours — forces a fresh load on next visit. */
+export const FEED_TTL_MS = 12 * 60 * 60 * 1000;
 export type FeedStatus = 'idle' | 'loading' | 'refreshing' | 'loading-more' | 'error';
 
 /** UI state for expanded post (in-place) and media modal (overlay) */
@@ -106,7 +111,9 @@ export interface FeedDerived {
 @Injectable()
 export class FeedContext {
   private readonly api = inject(RantService);
-  private readonly destroyRef = inject(DestroyRef);
+
+  /** Cancels any in-flight HTTP request when a new one starts or on reset. */
+  private readonly cancel$ = new Subject<void>();
 
   private readonly items = signal<Rant[]>(INITIAL_FEED_STATE.items);
   private readonly rantMap = signal<Record<string, Rant>>(INITIAL_FEED_STATE.rantMap);
@@ -120,6 +127,9 @@ export class FeedContext {
   private readonly _expandedPostMode = signal<ExpandedPostMode>(INITIAL_FEED_STATE.expandedPostMode);
   private readonly _mediaModalPostId = signal<string | null>(INITIAL_FEED_STATE.mediaModalPostId);
   private readonly _mediaModalMediaIndex = signal<number>(INITIAL_FEED_STATE.mediaModalMediaIndex);
+
+  /** Timestamp (ms) when the feed was last successfully loaded. Null = never loaded. */
+  private readonly lastLoadedAt = signal<number | null>(null);
 
   readonly state = signal<FeedState>(INITIAL_FEED_STATE);
 
@@ -180,13 +190,15 @@ export class FeedContext {
     this.runPageQuery({ page: 1, pageSize: this.pageSize() }, 'refreshing');
   }
 
-  /** Clear all state. */
+  /** Clear all state (e.g. on logout or auth change). */
   reset(): void {
+    this.cancel$.next();
     this.items.set([]);
     this.rantMap.set({});
     this.page.set(0);
     this.error.set(null);
     this.status.set('idle');
+    this.lastLoadedAt.set(null);
     // Clear UI state
     this._scrollPosition.set(0);
     this._expandedPostId.set(null);
@@ -194,6 +206,20 @@ export class FeedContext {
     this._mediaModalPostId.set(null);
     this._mediaModalMediaIndex.set(0);
     this.syncState();
+  }
+
+  /* ----------------------- Session / TTL helpers ----------------------- */
+
+  /** True if the feed has loaded items and hasn't expired. */
+  hasData(): boolean {
+    return this.items().length > 0 && !this.isExpired();
+  }
+
+  /** True if the feed session has exceeded the 12-hour TTL. */
+  isExpired(): boolean {
+    const ts = this.lastLoadedAt();
+    if (ts === null) return true;
+    return Date.now() - ts > FEED_TTL_MS;
   }
 
   /** Prepend a freshly-created rant to the top of the feed. */
@@ -225,7 +251,7 @@ export class FeedContext {
     });
     this.api
       .toggleLike(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancel$))
       .subscribe({
         next: () => this.reconcileRant(id),
         error: (err) => {
@@ -246,7 +272,7 @@ export class FeedContext {
     });
     this.api
       .toggleRerant(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancel$))
       .subscribe({
         next: () => this.reconcileRant(id),
         error: (err) => {
@@ -264,7 +290,7 @@ export class FeedContext {
     this.optimisticPatch(id, { isBookmarkedByMe: !rant.isBookmarkedByMe });
     this.api
       .toggleBookmark(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancel$))
       .subscribe({
         next: () => this.reconcileRant(id),
         error: (err) => {
@@ -331,12 +357,13 @@ export class FeedContext {
   }
 
   private runPageQuery(query: { page: number; pageSize: number }, mode: 'loading' | 'loading-more' | 'refreshing'): void {
+    this.cancel$.next(); // Cancel any in-flight request
     this.status.set(mode);
     this.error.set(null);
 
     this.api
       .getHomeFeed(query.page, query.pageSize)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancel$))
       .subscribe({
         next: (items) => this.applyPage(items, query, mode),
         error: (err) => {
@@ -361,6 +388,7 @@ export class FeedContext {
     for (const r of this.items()) map[r.id] = r;
     this.rantMap.set(map);
     this.status.set('idle');
+    this.lastLoadedAt.set(Date.now());
     this.syncState();
   }
 
@@ -381,10 +409,10 @@ export class FeedContext {
   }
 
   /** Re-fetch the latest truth from the server for one rant and reconcile into state. */
-  private reconcileRant(id: string): void {
+  reconcileRant(id: string): void {
     this.api
       .getRant(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancel$))
       .subscribe({
         next: (rant) => {
           const updated = { ...rant };
@@ -415,7 +443,7 @@ export class FeedContext {
     if (typeof err === 'string') return err;
     if (err instanceof Error) {
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-        return 'Network unreachable — is the API running at 192.168.1.44:5000?';
+        return 'Network unreachable — please check if the backend API is running.';
       }
       if (err.message.toLowerCase().includes('401')) return 'Session expired — please sign in again.';
       if (err.message.toLowerCase().includes('404')) return 'Rant not found.';
@@ -432,10 +460,8 @@ import { InjectionToken, Provider, inject as angularInject } from '@angular/core
 export const FEED_CONTEXT = new InjectionToken<FeedContext>('FEED_CONTEXT');
 
 /**
- * Provide the feed state at a given feed boundary. Typically added to the
- * route/component that hosts the home feed; guards on that route should run
- * authGuard so an authenticated session is guaranteed to exist when the
- * Context mounts.
+ * Provide the feed state as a singleton at the app root.
+ * Register in app.config.ts providers so the feed persists across route navigations.
  */
 export function provideFeedContext(): Provider {
   return { provide: FEED_CONTEXT, useClass: FeedContext };

@@ -1,16 +1,21 @@
 <section class="page notifications-page">
   <div class="page-header">
-    <h1>Notifications</h1>
-    @if (unreadCount > 0) {
-      <p>{{ unreadCount }} unread notification{{ unreadCount === 1 ? '' : 's' }}</p>
-    } @else {
-      <p>You're all caught up.</p>
+    <div class="page-header__left">
+      <h1>Notifications</h1>
+      @if (unreadCount() > 0) {
+        <p class="page-header-subtitle">{{ unreadCount() }} unread notification{{ unreadCount() === 1 ? '' : 's' }}</p>
+      } @else {
+        <p class="page-header-subtitle">You're all caught up.</p>
+      }
+    </div>
+    @if (unreadCount() > 0) {
+      <button class="btn-mark-all" (click)="markAllAsRead()">Mark all as read</button>
     }
   </div>
 
   <div class="notifications-list">
     @for (notification of notifications(); track notification.id) {
-      <app-notification-card [notification]="notification" />
+      <app-notification-card [notification]="notification" (click)="onNotificationClick(notification)" />
     } @empty {
       <div class="empty-state">
         <div class="empty-icon">🔔</div>

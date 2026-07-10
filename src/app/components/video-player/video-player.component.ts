@@ -6,7 +6,8 @@ import {
   OnDestroy,
   ViewChild,
   inject,
-  effect
+  effect,
+  signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VideoStateService } from '../../services/video-state.service';
@@ -29,12 +30,15 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
 
   private observer: IntersectionObserver | null = null;
 
+  /** Whether the volume slider is expanded / visible */
+  readonly showVolumeSlider = signal(false);
+
   // Reactively bind local values to the shared state service
   readonly isMuted = this.videoStateService.isMuted;
   readonly volume = this.videoStateService.volume;
 
   constructor() {
-    // When global mute state changes, update the video element directly (in case bindings lag)
+    // When global mute or volume state changes, apply to this video element
     effect(() => {
       const muted = this.isMuted();
       const vol = this.volume();
@@ -57,6 +61,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     const video = this.videoElementRef?.nativeElement;
     if (video) {
       video.pause();
+      this.videoStateService.releaseIfActive(video);
     }
   }
 
@@ -70,12 +75,10 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
       entries.forEach((entry) => {
         const video = this.videoElementRef.nativeElement;
         if (entry.isIntersecting) {
-          // Play video with catch block to handle browser autoplay policies
-          video.play().catch((err) => {
-            console.log('Autoplay blocked or interrupted:', err);
-          });
+          this.playVideo(video);
         } else {
           video.pause();
+          this.videoStateService.releaseIfActive(video);
         }
       });
     }, options);
@@ -83,13 +86,22 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     this.observer.observe(this.videoElementRef.nativeElement);
   }
 
+  /** Centralized play helper — ensures only one video plays at a time */
+  private playVideo(video: HTMLVideoElement): void {
+    this.videoStateService.requestPlay(video);
+    video.play().catch((err) => {
+      console.log('Autoplay blocked or interrupted:', err);
+    });
+  }
+
   togglePlay(event: Event): void {
     event.stopPropagation(); // Stop click from opening details view
     const video = this.videoElementRef.nativeElement;
     if (video.paused) {
-      video.play().catch(err => console.log(err));
+      this.playVideo(video);
     } else {
       video.pause();
+      this.videoStateService.releaseIfActive(video);
     }
   }
 
@@ -97,5 +109,16 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
     event.stopPropagation(); // Prevent card navigation or media modal opening
     const currentMute = this.isMuted();
     this.videoStateService.isMuted.set(!currentMute);
+  }
+
+  toggleVolumeSlider(event: Event): void {
+    event.stopPropagation();
+    this.showVolumeSlider.update(v => !v);
+  }
+
+  onVolumeChange(event: Event): void {
+    event.stopPropagation();
+    const input = event.target as HTMLInputElement;
+    this.videoStateService.setVolume(parseFloat(input.value));
   }
 }

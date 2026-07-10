@@ -1,0 +1,182 @@
+.search-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 2rem;
+  width: 100%;
+}
+
+.search-feed__header {
+  padding: 1rem 1.25rem 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #3d4f6e);
+}
+
+.search-feed__query {
+  color: var(--color-primary, #00c2ff);
+  font-weight: 600;
+}
+
+/* ── Search Tabs ── */
+.search-feed__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 0.5rem;
+}
+
+.search-feed__tab {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+  font-family: inherit;
+  outline: none;
+}
+
+.search-feed__tab:hover {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.search-feed__tab.active {
+  color: var(--color-text);
+  font-weight: 700;
+  border-bottom-color: var(--color-primary);
+}
+
+/* ── Search Users List ── */
+.search-users-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-user-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.search-user-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.search-user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.search-user-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-user-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.search-user-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.search-user-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-user-handle {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.search-user-follow-btn {
+  background: rgba(0, 194, 255, 0.10);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: 9999px;
+  padding: 6px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.search-user-follow-btn:hover {
+  background: rgba(255, 0, 128, 0.15);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 16px rgba(255, 0, 128, 0.25);
+}
+
+.search-user-follow-btn.following {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.search-user-follow-btn.following:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: #ef4444;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.25);
+}
+
+.search-user-bio {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 4px 0 0 0;
+}
+
+.search-feed__error {
+  padding: 2rem;
+  text-align: center;
+  color: #ff3366;
+}
+
+.search-feed__empty {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--color-text-muted, #3d4f6e);
+}
+
+.search-feed__empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.search-feed__empty h3 {
+  color: var(--color-text, #dde4f0);
+  margin-bottom: 0.5rem;
+}

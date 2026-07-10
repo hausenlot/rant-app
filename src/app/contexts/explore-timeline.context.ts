@@ -2,8 +2,9 @@
  * ExploreTimelineContext
  * ----------------------
  * Self-contained, signal-based Context (state + provider) for the public
- * explore timeline. Holds rants, pagination, loading/error state and exposes
- * actions the UI will call (`loadFirstPage`, `loadNextPage`, `refresh`, `reset`).
+ * explore timeline. Registered as a **singleton** at the app root so the
+ * explore feed persists across route navigations. Only resets on manual
+ * refresh, auth change, or 12-hour TTL expiry.
  *
  * No component imports it directly — they call useExploreTimelineContext() so the
  * state stays in one place and every consumer sees the same signals.
@@ -20,21 +21,20 @@ import {
   computed,
   inject,
   signal,
-  DestroyRef,
   effect,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  TimelineService,
-  TimelineQuery,
-  TimelinePage,
-} from '../services/timeline.service';
+import { Subject, takeUntil } from 'rxjs';
+import { TimelineService } from '../services/timeline.service';
+import { RantService } from '../services/rant.service';
+import type { TimelineQuery, TimelinePage } from '../models/timeline.model';
 import type { Rant } from '../models/rant.model';
 
 /* --------------------------------- State --------------------------------- */
 
 /** Default page size matches the explore-trending seed UX (5 tiles). */
 export const DEFAULT_PAGE_SIZE = 5;
+/** Explore feed session expires after 12 hours. */
+export const EXPLORE_TTL_MS = 12 * 60 * 60 * 1000;
 
 export type PageStatus = 'idle' | 'loading' | 'refreshing' | 'loading-more' | 'error';
 
@@ -92,13 +92,16 @@ export const INITIAL_STATE: ExploreTimelineState = {
 /**
  * Signal-based Context for the explore timeline.
  *
- * Instantiate once (provideExploreTimelineContext() in component providers) so
- * children share state as a group rather than hopping a global singleton.
+ * Registered as a singleton at the app root so the explore feed persists
+ * across route navigations.
  */
 @Injectable()
 export class ExploreTimelineContext {
   private readonly api = inject(TimelineService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly rantService = inject(RantService);
+
+  /** Cancels any in-flight HTTP request when a new one starts or on reset. */
+  private readonly cancel$ = new Subject<void>();
 
   /* --- raw signals --- */
   private readonly items = signal<Rant[]>(INITIAL_STATE.items);
@@ -107,6 +110,9 @@ export class ExploreTimelineContext {
   private readonly total = signal<number>(INITIAL_STATE.total);
   private readonly status = signal<PageStatus>(INITIAL_STATE.status);
   private readonly error = signal<string | null>(INITIAL_STATE.error);
+
+  /** Timestamp (ms) when the explore feed was last successfully loaded. */
+  private readonly lastLoadedAt = signal<number | null>(null);
 
   /* --- expose raw state as a snapshot --- */
   readonly state = signal<ExploreTimelineState>(INITIAL_STATE);
@@ -184,26 +190,126 @@ export class ExploreTimelineContext {
    * Reset all state back to idle/empty. Useful after sign-out.
    */
   reset(): void {
+    this.cancel$.next();
     this.items.set([]);
     this.page.set(0);
     this.total.set(0);
     this.error.set(null);
     this.status.set('idle');
+    this.lastLoadedAt.set(null);
+  }
+
+  /** Toggle like on an explore rant (optimistic, reconcile on success). */
+  toggleLike(id: string): void {
+    const items = this.items();
+    const original = items.find((r) => r.id === id);
+    if (!original) return;
+
+    const updated = {
+      ...original,
+      isLikedByMe: !original.isLikedByMe,
+      likeCount: original.likeCount + (original.isLikedByMe ? -1 : 1),
+    };
+    this.items.update((list) => list.map((r) => (r.id === id ? updated : r)));
+
+    this.rantService
+      .toggleLike(id)
+      .pipe(takeUntil(this.cancel$))
+      .subscribe({
+        next: () => this.reconcileRant(id),
+        error: () => {
+          this.items.update((list) => list.map((r) => (r.id === id ? original : r)));
+        },
+      });
+  }
+
+  /** Toggle rerant on an explore rant (optimistic). */
+  toggleRerant(id: string): void {
+    const items = this.items();
+    const original = items.find((r) => r.id === id);
+    if (!original) return;
+
+    const updated = {
+      ...original,
+      isRerantedByMe: !original.isRerantedByMe,
+      reRantCount: original.reRantCount + (original.isRerantedByMe ? -1 : 1),
+    };
+    this.items.update((list) => list.map((r) => (r.id === id ? updated : r)));
+
+    this.rantService
+      .toggleRerant(id)
+      .pipe(takeUntil(this.cancel$))
+      .subscribe({
+        next: () => this.reconcileRant(id),
+        error: () => {
+          this.items.update((list) => list.map((r) => (r.id === id ? original : r)));
+        },
+      });
+  }
+
+  /** Toggle bookmark on an explore rant (optimistic). */
+  toggleBookmark(id: string): void {
+    const items = this.items();
+    const original = items.find((r) => r.id === id);
+    if (!original) return;
+
+    const updated = {
+      ...original,
+      isBookmarkedByMe: !original.isBookmarkedByMe,
+    };
+    this.items.update((list) => list.map((r) => (r.id === id ? updated : r)));
+
+    this.rantService
+      .toggleBookmark(id)
+      .pipe(takeUntil(this.cancel$))
+      .subscribe({
+        next: () => this.reconcileRant(id),
+        error: () => {
+          this.items.update((list) => list.map((r) => (r.id === id ? original : r)));
+        },
+      });
+  }
+
+  /** Re-fetch the latest truth from the server for one rant and reconcile. */
+  private reconcileRant(id: string): void {
+    this.rantService
+      .getRant(id)
+      .pipe(takeUntil(this.cancel$))
+      .subscribe({
+        next: (rant) => {
+          this.items.update((list) => list.map((r) => (r.id === id ? rant : r)));
+        },
+      });
+  }
+
+  /* ----------------------- Session / TTL helpers ----------------------- */
+
+  /** True if the explore feed has loaded items and hasn't expired. */
+  hasData(): boolean {
+    return this.items().length > 0 && !this.isExpired();
+  }
+
+  /** True if the explore feed session has exceeded the 12-hour TTL. */
+  isExpired(): boolean {
+    const ts = this.lastLoadedAt();
+    if (ts === null) return true;
+    return Date.now() - ts > EXPLORE_TTL_MS;
   }
 
   /* ------------------------------- Internals ------------------------------ */
 
   /**
    * Runs the given query against the API, updates raw signals from the result,
-   * and resolves loading flags. Scoped to the instance's lifecycle via takeUntilDestroyed.
+   * and resolves loading flags. Uses cancel$ to abort in-flight requests.
    */
   private runQuery(query: TimelineQuery, mode: 'loading' | 'loading-more'): void {
+    this.cancel$.next(); // Cancel any in-flight request
     this.status.set(mode === 'loading' ? 'loading' : 'loading-more');
     this.error.set(null);
 
     this.api
       .getHomeTimeline(query)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancel$))
       .subscribe({
         next: (page) => this.applyPage(page, mode),
         error: (err: unknown) => {
@@ -227,13 +333,14 @@ export class ExploreTimelineContext {
     this.page.set(page.page);
     this.total.set(page.total);
     this.status.set('idle');
+    this.lastLoadedAt.set(Date.now());
   }
 
   /** Convert a raw HTTP/platform error into a short UI message. */
   private humanizeError(err: unknown): string {
     if (err instanceof Error) {
       if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-        return 'Network unreachable — is the API running at ' + '192.168.1.44:5000?';
+        return 'Network unreachable — please check if the backend API is running.';
       }
       return err.message;
     }
@@ -253,8 +360,8 @@ export const EXPLORE_TIMELINE_CONTEXT = new InjectionToken<ExploreTimelineContex
 );
 
 /**
- * Creates the Context as a provider. Per-group, mirroring blog-State patterns:
- * place this in the `providers` array of the component that owns the explore tab.
+ * Provide the explore timeline state as a singleton at the app root.
+ * Register in app.config.ts providers so the feed persists across route navigations.
  */
 export function provideExploreTimelineContext(): Provider {
   return {

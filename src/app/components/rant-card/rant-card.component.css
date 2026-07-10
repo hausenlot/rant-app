@@ -9,7 +9,7 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: visible;
     min-width: 0;
     /* Prevent flex item from expanding */
     flex: 1 1 auto;
@@ -17,7 +17,7 @@
 }
 
 .rant-card:hover {
-    box-shadow: 0 2px 8px rgba(0, 255, 135, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 194, 255, 0.05);
 }
 
 /* ── Re-rant label ── */
@@ -69,7 +69,7 @@
     min-width: 0;
     flex: 1;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .rant-card__display-name {
@@ -354,17 +354,46 @@
 }
 
 .rant-card__action:hover {
-    background: rgba(0, 255, 135, 0.08);
-    color: var(--color-primary, #00ff87);
+    background: rgba(0, 194, 255, 0.08);
+    color: var(--color-primary, #00c2ff);
 }
 
 .rant-card__action.active {
-    color: var(--color-primary, #00ff87);
+    color: var(--color-primary, #00c2ff);
 }
 
 .rant-card__action.active svg {
-    fill: var(--color-primary, #00ff87);
-    stroke: var(--color-primary, #00ff87);
+    fill: var(--color-primary, #00c2ff);
+    stroke: var(--color-primary, #00c2ff);
+}
+
+/* Specific button styles */
+.rant-card__action[aria-label="Like"]:hover {
+    background: var(--color-like-hover, rgba(255, 0, 128, 0.08));
+    color: var(--color-like, #ff0080);
+}
+
+.rant-card__action[aria-label="Like"].active {
+    color: var(--color-like, #ff0080);
+}
+
+.rant-card__action[aria-label="Like"].active svg {
+    fill: var(--color-like, #ff0080);
+    stroke: var(--color-like, #ff0080);
+}
+
+.rant-card__action[aria-label="Re-rant"]:hover {
+    background: var(--color-rerant-hover, rgba(0, 255, 135, 0.08));
+    color: var(--color-rerant, #00ff87);
+}
+
+.rant-card__action[aria-label="Re-rant"].active {
+    color: var(--color-rerant, #00ff87);
+}
+
+.rant-card__action[aria-label="Re-rant"].active svg {
+    fill: var(--color-rerant, #00ff87);
+    stroke: var(--color-rerant, #00ff87);
 }
 
 .rant-card__action svg {
@@ -433,4 +462,207 @@
         font-size: 0.75rem;
         padding: 0.25rem;
     }
+}
+
+/* ── Mini Profile Trigger & Card ── */
+.mini-profile-trigger {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+}
+
+.rant-card__avatar-container {
+    flex-shrink: 0;
+}
+
+.rant-card__profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.mini-profile-card {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 280px;
+    background: rgba(17, 24, 40, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(255, 255, 255, 0.05);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s;
+    transition-delay: 0s;
+    color: var(--color-text, #dde4f0);
+    text-align: left;
+    white-space: normal;
+    /* CRITICAL: Override nowrap from user-info */
+}
+
+/* Hover Bridge: transparent area that prevents the mouse from losing focus when crossing the gap */
+.mini-profile-card::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: transparent;
+}
+
+.mini-profile-trigger:hover .mini-profile-card {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition-delay: 0.4s;
+    /* Premium 400ms hover delay to prevent accidental overlays */
+}
+
+/* Adjust card positioning slightly for avatar wrapper */
+.rant-card__avatar-container.mini-profile-trigger {
+    position: relative;
+    display: block;
+}
+
+.rant-card__avatar-container .mini-profile-card {
+    left: -10px;
+    /* offset slightly for aesthetic balance */
+}
+
+/* Mini Profile contents styling */
+.mini-profile-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    width: 100%;
+}
+
+.mini-profile-card__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.mini-profile-card__follow-btn {
+    background: var(--color-primary-glow, rgba(0, 194, 255, 0.1));
+    color: var(--color-primary, #00c2ff);
+    border: 1px solid var(--color-primary, #00c2ff);
+    border-radius: 20px;
+    padding: 0.35rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mini-profile-card__follow-btn:hover {
+    background: var(--color-primary, #00c2ff);
+    color: var(--color-bg, #060a0f);
+    box-shadow: 0 0 10px var(--color-primary-glow, rgba(0, 194, 255, 0.15));
+}
+
+.mini-profile-card__details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 0.75rem;
+}
+
+.mini-profile-card__display-name {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--color-text, #dde4f0);
+    line-height: 1.2;
+}
+
+.mini-profile-card__username {
+    font-size: 0.875rem;
+    color: var(--color-text-muted, #3d4f6e);
+}
+
+.mini-profile-card__stats {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 0.75rem;
+    font-size: 0.8125rem;
+}
+
+.mini-profile-card__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.mini-profile-card__stat-val {
+    font-weight: 700;
+    color: var(--color-text, #dde4f0);
+}
+
+.mini-profile-card__stat-lbl {
+    color: var(--color-text-muted, #3d4f6e);
+}
+
+/* ── Profile Link Hover Visual Cues ── */
+.rant-card__display-name:hover,
+.mini-profile-card__display-name:hover {
+    text-decoration: underline;
+}
+
+.mini-profile-card__avatar:hover,
+.mini-profile-card__display-name:hover {
+    cursor: pointer;
+}
+
+.rant-card__hashtag {
+    color: var(--color-primary, #00c2ff);
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.rant-card__hashtag:hover {
+    color: var(--color-primary-light, #33d1ff);
+    text-decoration: underline;
+}
+
+/* Avatar image rendering */
+.rant-card__avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Mini Profile Card Following state */
+.mini-profile-card__follow-btn.following {
+    background: transparent;
+    color: var(--color-text-muted, #6e7681);
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.15));
+}
+
+.mini-profile-card__follow-btn.following:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: #ef4444;
 }

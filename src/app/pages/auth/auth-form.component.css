@@ -74,13 +74,24 @@
   max-width: 70%;
 }
 
-.auth-hero__logo {
-  font-size: 2rem;
+.auth-hero__logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 3rem;
+}
+
+.auth-hero__logo-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.auth-hero__logo-text {
+  font-size: 2.25rem;
   font-weight: 900;
   letter-spacing: -0.04em;
   color: var(--color-text, #dde4f0);
-  margin-bottom: 3rem;
-  display: block;
 }
 
 .auth-hero__headline {
@@ -242,10 +253,10 @@
 }
 
 .auth-form__submit:hover {
-  background: rgba(255, 0, 128, 0.15);
-  color: var(--color-accent, #ff0080);
-  border-color: var(--color-accent, #ff0080);
-  box-shadow: 0 0 20px rgba(255, 0, 128, 0.25);
+  background: rgba(232, 237, 242, 0.1);
+  color: var(--color-accent, #e8edf2);
+  border-color: var(--color-accent, #e8edf2);
+  box-shadow: 0 0 20px rgba(232, 237, 242, 0.15);
 }
 
 .auth-form__submit:active {
@@ -268,7 +279,7 @@
 }
 
 .auth-form__link:hover {
-  color: var(--color-accent, #ff0080);
+  color: var(--color-accent, #e8edf2);
 }
 
 /* ── Hero blob drift ─────────────────────────────────── */

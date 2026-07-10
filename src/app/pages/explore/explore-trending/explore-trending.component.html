@@ -1,6 +1,6 @@
 <div class="explore-feed">
   @for (post of posts(); track post.tag) {
-    <app-explore-post-card [post]="post" class="explore-feed__card" />
+    <app-explore-post-card [post]="post" (click)="onTagClick(post.tag)" class="explore-feed__card" />
   } @empty {
     <div class="empty-state">
       <div class="empty-icon">🔥</div>

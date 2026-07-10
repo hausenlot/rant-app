@@ -1,0 +1,92 @@
+<div class="search-feed">
+  <div class="search-feed__header">
+    Search results for: <span class="search-feed__query">"{{ query() }}"</span>
+  </div>
+
+  <!-- Search Tabs -->
+  <div class="search-feed__tabs" role="tablist">
+    <button 
+      class="search-feed__tab" 
+      [class.active]="activeTab() === 'rants'" 
+      (click)="setActiveTab('rants')"
+      role="tab"
+    >
+      Rants
+    </button>
+    <button 
+      class="search-feed__tab" 
+      [class.active]="activeTab() === 'people'" 
+      (click)="setActiveTab('people')"
+      role="tab"
+    >
+      People
+    </button>
+  </div>
+
+  <div class="search-feed__content">
+    @if (isLoading()) {
+      <app-rant-card-skeleton [count]="3" />
+    } @else if (error()) {
+      <div class="search-feed__error">
+        {{ error() }}
+      </div>
+    } @else {
+      @if (activeTab() === 'rants') {
+        @for (rant of rants(); track rant.id) {
+          <app-rant-card 
+            [rant]="rant" 
+            [readonly]="!isAuthenticated()"
+            (likeClick)="onToggleLike(rant.id)"
+            (rerantClick)="onToggleReRant(rant.id)"
+            (bookmarkClick)="onToggleBookmark(rant.id)"
+            class="search-feed__card"
+          />
+        } @empty {
+          <div class="search-feed__empty">
+            <div class="search-feed__empty-icon">🔍</div>
+            <h3>No rants found</h3>
+            <p>We couldn't find any rants matching "{{ query() }}". Try adjusting your search term.</p>
+          </div>
+        }
+      } @else if (activeTab() === 'people') {
+        <div class="search-users-list">
+          @for (user of users(); track user.id) {
+            <div class="search-user-item" (click)="goToProfile(user.username)">
+              @if (user.profileImageUrl) {
+                <img [src]="user.profileImageUrl" alt="Avatar" class="search-user-avatar" />
+              } @else {
+                <div class="search-user-avatar" [style.background]="getAvatarColor(user.username)">
+                  {{ getInitials(user) }}
+                </div>
+              }
+              <div class="search-user-info">
+                <div class="search-user-header">
+                  <div class="search-user-names">
+                    <span class="search-user-name">{{ user.displayName || user.username }}</span>
+                    <span class="search-user-handle">@{{ user.username }}</span>
+                  </div>
+                  <button 
+                    class="search-user-follow-btn" 
+                    [class.following]="user.isFollowedByMe"
+                    (click)="toggleFollow($event, user)"
+                  >
+                    {{ user.isFollowedByMe ? 'Following' : 'Follow' }}
+                  </button>
+                </div>
+                @if (user.bio) {
+                  <p class="search-user-bio">{{ user.bio }}</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="search-feed__empty">
+              <div class="search-feed__empty-icon">👥</div>
+              <h3>No profiles found</h3>
+              <p>We couldn't find any profiles matching "{{ query() }}".</p>
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

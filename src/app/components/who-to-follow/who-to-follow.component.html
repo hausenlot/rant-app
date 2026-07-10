@@ -1,0 +1,42 @@
+<div class="rp-card">
+  <h2 class="rp-card-title">Who to follow</h2>
+
+  @if (loading() && suggestedUsers().length === 0) {
+    <div class="rp-loading-placeholder">Loading suggestions...</div>
+  } @else if (error() && suggestedUsers().length === 0) {
+    <div class="rp-error-placeholder">{{ error() }}</div>
+  } @else if (suggestedUsers().length === 0) {
+    <div class="rp-empty-placeholder">No suggestions found</div>
+  } @else {
+    <div class="rp-follow-list">
+      @for (user of suggestedUsers(); track user.id) {
+        <div class="rp-follow-item" (click)="goToProfile(user.username)">
+          @if (user.profileImageUrl) {
+            <img [src]="user.profileImageUrl" alt="Avatar" class="rp-follow-avatar" />
+          } @else {
+            <div class="rp-follow-avatar" [style.background]="getAvatarColor(user.username)">
+              {{ getInitials(user) }}
+            </div>
+          }
+          <div class="rp-follow-info">
+            <span class="rp-follow-name">{{ user.displayName || user.username }}</span>
+            <span class="rp-follow-handle">@{{ user.username }}</span>
+          </div>
+          <button 
+            class="rp-follow-btn" 
+            [class.following]="user.isFollowedByMe"
+            (click)="toggleFollow($event, user)"
+          >
+            {{ user.isFollowedByMe ? 'Following' : 'Follow' }}
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (hasMore()) {
+      <button class="rp-show-more" [disabled]="loading()" (click)="showMore()">
+        {{ loading() ? 'Loading...' : 'Show more' }}
+      </button>
+    }
+  }
+</div>

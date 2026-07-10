@@ -9,19 +9,51 @@
     (click)="togglePlay($event)"
   ></video>
 
-  <!-- Floating mute/unmute toggle -->
-  <button class="video-player__mute-btn" (click)="toggleMute($event)" aria-label="Toggle mute state">
-    @if (isMuted()) {
-      <!-- Muted Icon -->
-      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-11 5.77v6h4l5 5V4L7 9H3z"/>
-        <line x1="23" y1="1" x2="1" y2="23" stroke="currentColor" stroke-width="2"/>
-      </svg>
-    } @else {
-      <!-- Unmuted Icon -->
-      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-      </svg>
-    }
-  </button>
+  <!-- Floating audio controls (bottom-right) -->
+  <div class="video-player__audio-controls">
+    <!-- Volume slider (slides out on hover/click of the volume button) -->
+    <div class="video-player__volume-group" [class.expanded]="showVolumeSlider()" (mouseleave)="showVolumeSlider.set(false)">
+      @if (showVolumeSlider()) {
+        <div class="video-player__volume-slider-track" (click)="$event.stopPropagation()">
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            [value]="volume()"
+            (input)="onVolumeChange($event)"
+            class="video-player__volume-slider"
+            aria-label="Volume"
+          />
+        </div>
+      }
+
+      <!-- Volume / Mute toggle button -->
+      <button
+        class="video-player__mute-btn"
+        (click)="toggleMute($event)"
+        (mouseenter)="showVolumeSlider.set(true)"
+        aria-label="Toggle mute state"
+      >
+        @if (isMuted() || volume() === 0) {
+          <!-- Muted Icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-11 5.77v6h4l5 5V4L7 9H3z"/>
+            <line x1="23" y1="1" x2="1" y2="23" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        } @else if (volume() < 0.5) {
+          <!-- Low Volume Icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M7 9v6h4l5 5V4l-5 5H7z"/>
+            <path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+          </svg>
+        } @else {
+          <!-- Full Volume Icon -->
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
 </div>

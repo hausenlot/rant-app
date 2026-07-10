@@ -1,9 +1,152 @@
 .notifications-page {
-  /* .page handles padding */
+  animation: fadeIn 0.4s ease-out;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  padding: 1.5rem 1rem;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.page-header-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.page-header__left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.btn-mark-all {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-mark-all:hover {
+  background: rgba(0, 255, 135, 0.08);
+  color: var(--color-primary);
+  border-color: rgba(0, 255, 135, 0.25);
+  box-shadow: 0 0 12px rgba(0, 255, 135, 0.15);
+}
+
+.btn-mark-all:active {
+  transform: scale(0.97);
 }
 
 .notifications-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  padding: 1rem;
+}
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center;
+  padding: 5rem 1.5rem;
+  color: var(--color-text-muted);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  animation: slideUp 0.5s ease-out;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1.25rem;
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-state h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.empty-state p {
+  margin: 0 auto;
+  font-size: 0.95rem;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* ── Mobile adjustments ── */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 1rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .empty-state {
+    padding: 4rem 1rem;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+  }
 }

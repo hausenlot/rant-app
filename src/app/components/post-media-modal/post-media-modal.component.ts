@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, take } from 'rxjs';
 import { Rant, Reply, MediaType } from '../../models/rant.model';
 import { RantService } from '../../services/rant.service';
 import { PostMediaModalService } from './post-media-modal.service';
@@ -72,6 +72,16 @@ export class PostMediaModalComponent implements OnDestroy {
 
   /** Whether there are more replies to load. */
   hasMoreReplies = signal(true);
+
+  /** Child replies keyed by parent reply ID. */
+  childRepliesMap = signal<Record<string, Reply[]>>({});
+
+  /** Loading states keyed by parent reply ID. */
+  loadingChildReplies = signal<Record<string, boolean>>({});
+
+  /** Set of reply IDs whose children are currently expanded/visible. */
+  expandedReplies = signal<Set<string>>(new Set());
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -182,5 +192,128 @@ export class PostMediaModalComponent implements OnDestroy {
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h`;
     if (diffMins < 43200) return `${Math.floor(diffMins / 1440)}d`;
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // ── Threaded reply methods ────────────────────────────────────────────
+
+  /** Toggle visibility of a reply's children. Loads on first expand. */
+  toggleChildReplies(reply: Reply): void {
+    const expanded = this.expandedReplies();
+    const next = new Set(expanded);
+
+    if (next.has(reply.id)) {
+      next.delete(reply.id);
+      this.expandedReplies.set(next);
+      return;
+    }
+
+    next.add(reply.id);
+    this.expandedReplies.set(next);
+
+    if (!this.childRepliesMap()[reply.id]) {
+      this.loadChildReplies(reply.id);
+    }
+  }
+
+  /** Fetch child replies for a given parent reply. */
+  private loadChildReplies(parentReplyId: string): void {
+    this.loadingChildReplies.update((m) => ({ ...m, [parentReplyId]: true }));
+
+    this.rantService.getChildReplies(parentReplyId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (children) => {
+          this.childRepliesMap.update((m) => ({ ...m, [parentReplyId]: children }));
+          this.loadingChildReplies.update((m) => ({ ...m, [parentReplyId]: false }));
+        },
+        error: (err) => {
+          console.error('Failed to load child replies:', err);
+          this.loadingChildReplies.update((m) => ({ ...m, [parentReplyId]: false }));
+        },
+      });
+  }
+
+  /** Toggle like on a reply and update local state. */
+  onToggleReplyLike(reply: Reply): void {
+    this.rantService.toggleReplyLike(reply.id)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          const wasLiked = reply.isLikedByMe;
+          const delta = wasLiked ? -1 : 1;
+
+          // Update in top-level replies
+          this.replies.update((list) =>
+            list.map((r) =>
+              r.id === reply.id
+                ? { ...r, isLikedByMe: !wasLiked, likeCount: r.likeCount + delta }
+                : r
+            )
+          );
+
+          // Update in child replies map
+          this.childRepliesMap.update((map) => {
+            const updated = { ...map };
+            for (const key of Object.keys(updated)) {
+              updated[key] = updated[key].map((r) =>
+                r.id === reply.id
+                  ? { ...r, isLikedByMe: !wasLiked, likeCount: r.likeCount + delta }
+                  : r
+              );
+            }
+            return updated;
+          });
+        },
+        error: (err) => console.error('Failed to toggle reply like:', err),
+      });
+  }
+
+  /** Check if a reply's children are currently expanded. */
+  isExpanded(replyId: string): boolean {
+    return this.expandedReplies().has(replyId);
+  }
+
+  /** Get child replies for a specific parent. */
+  getChildReplies(parentReplyId: string): Reply[] {
+    return this.childRepliesMap()[parentReplyId] || [];
+  }
+
+  /** Check if child replies are loading for a specific parent. */
+  isLoadingChildren(parentReplyId: string): boolean {
+    return !!this.loadingChildReplies()[parentReplyId];
+  }
+
+  getLocalTime(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  getFullTime(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+      timeZoneName: 'short'
+    });
+  }
+
+  formatCount(count: number): string {
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
+    return String(count);
   }
 }

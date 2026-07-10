@@ -1,0 +1,134 @@
+.rp-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rp-card-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 12px 0;
+}
+
+.rp-follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rp-follow-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background var(--transition);
+}
+
+.rp-follow-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rp-follow-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.rp-follow-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.rp-follow-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rp-follow-handle {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.rp-follow-btn {
+  background: rgba(0, 255, 135, 0.10);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: 9999px;
+  padding: 6px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.rp-follow-btn:hover {
+  background: rgba(255, 0, 128, 0.15);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 16px rgba(255, 0, 128, 0.25);
+}
+
+.rp-follow-btn.following {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.rp-follow-btn.following:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: #ef4444;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.25);
+}
+
+.rp-show-more {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px 8px 4px;
+  transition: color var(--transition);
+}
+
+.rp-show-more:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.rp-show-more:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.rp-loading-placeholder,
+.rp-error-placeholder,
+.rp-empty-placeholder {
+  padding: 16px 8px;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}

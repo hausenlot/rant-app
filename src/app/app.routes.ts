@@ -9,6 +9,7 @@ import { ExploreForYouComponent } from './pages/explore/explore-for-you/explore-
 import { ExploreTrendingComponent } from './pages/explore/explore-trending/explore-trending.component';
 import { ExploreMemesComponent } from './pages/explore/explore-memes/explore-memes.component';
 import { ExploreGamesComponent } from './pages/explore/explore-games/explore-games.component';
+import { ExploreSearchFeedComponent } from './pages/explore/explore-search-feed/explore-search-feed.component';
 import { SignInComponent } from './pages/auth/sign-in.component';
 import { SignUpComponent } from './pages/auth/sign-up.component';
 import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
@@ -45,6 +46,7 @@ export const routes: Routes = [
           { path: 'trending', component: ExploreTrendingComponent },
           { path: 'memes', component: ExploreMemesComponent },
           { path: 'games', component: ExploreGamesComponent },
+          { path: 'search', component: ExploreSearchFeedComponent },
         ],
       },
       // Auth-required routes — unauthenticated visitors are redirected to sign-in.
@@ -52,6 +54,7 @@ export const routes: Routes = [
       { path: 'notifications', component: NotificationsComponent, canActivate: [authGuard] },
       { path: 'bookmarks', component: BookmarksComponent, canActivate: [authGuard] },
       { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+      { path: 'profile/:username', component: ProfileComponent },
       { path: '**', redirectTo: '' },
     ],
   },

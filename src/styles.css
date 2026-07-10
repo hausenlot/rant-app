@@ -5,15 +5,23 @@
    — Midnight Neon palette
 ──────────────────────────────────────────── */
 :root {
-  --color-bg: #05080f;
-  --color-surface: #0a0e1a;
-  --color-surface-2: #111828;
-  --color-border: rgba(255, 255, 255, 0.10);
-  --color-text: #dde4f0;
-  --color-text-muted: #3d4f6e;
-  --color-primary: #00ff87;
-  --color-primary-glow: rgba(0, 255, 135, 0.15);
-  --color-accent: #ff0080;
+  --color-bg: #060a0f;
+  --color-surface: #0d1117;
+  --color-surface-2: #161d27;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-text: #e8edf2;
+  --color-text-muted: #6b7f91;
+  --color-primary: #00c2ff;
+  --color-primary-glow: rgba(0, 194, 255, 0.15);
+  --color-accent: #e8edf2;
+
+  --color-like: #ff0080;
+  --color-like-glow: rgba(255, 0, 128, 0.15);
+  --color-like-hover: rgba(255, 0, 128, 0.08);
+
+  --color-rerant: #00ff87;
+  --color-rerant-glow: rgba(0, 255, 135, 0.15);
+  --color-rerant-hover: rgba(0, 255, 135, 0.08);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -131,17 +139,17 @@ html {
 }
 
 .btn-primary {
-  background: rgba(0, 255, 135, 0.12);
+  background: var(--color-primary-glow);
   color: var(--color-primary);
   border-color: var(--color-primary);
   box-shadow: 0 0 12px var(--color-primary-glow);
 }
 
 .btn-primary:hover {
-  background: rgba(255, 0, 128, 0.15);
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-  box-shadow: 0 0 20px rgba(255, 0, 128, 0.25);
+  background: rgba(0, 194, 255, 0.25);
+  color: #ffffff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 20px rgba(0, 194, 255, 0.35);
   transform: translateY(-1px);
 }
 
@@ -152,7 +160,7 @@ html {
 }
 
 .btn-ghost:hover {
-  background: rgba(0, 255, 135, 0.08);
+  background: rgba(0, 194, 255, 0.08);
   color: var(--color-text);
   border-color: var(--color-primary);
 }
@@ -168,4 +176,9 @@ html {
   .page-header h1 {
     font-size: 1.5rem;
   }
+}
+
+/* Ensure native [hidden] attribute works even with display-overriding classes */
+[hidden] {
+  display: none !important;
 }

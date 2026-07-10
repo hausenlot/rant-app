@@ -15,12 +15,106 @@
 
     <!-- Header -->
     <div class="rant-card__header">
-        <div class="rant-card__avatar" [style.background]="getAvatarColor()">
-            {{ avatarInitials }}
+        <div class="rant-card__avatar-container mini-profile-trigger" (mouseenter)="loadMiniProfile()">
+            <div class="rant-card__avatar" [style.background]="rant.profileImageUrl ? 'transparent' : getAvatarColor()" (click)="onProfileClick($event)">
+                @if (rant.profileImageUrl) {
+                    <img [src]="rant.profileImageUrl" alt="Avatar" class="rant-card__avatar-img" />
+                } @else {
+                    {{ avatarInitials }}
+                }
+            </div>
+            <!-- Mini Profile Card -->
+            <div class="mini-profile-card" (click)="$event.stopPropagation()">
+                <div class="mini-profile-card__header">
+                    <div class="mini-profile-card__avatar" [style.background]="rant.profileImageUrl ? 'transparent' : getAvatarColor()"
+                        (click)="onProfileClick($event)">
+                        @if (rant.profileImageUrl) {
+                            <img [src]="rant.profileImageUrl" alt="Avatar" class="rant-card__avatar-img" />
+                        } @else {
+                            {{ avatarInitials }}
+                        }
+                    </div>
+                    @if (miniProfile(); as mp) {
+                        @if (!isCurrentUser(mp.username)) {
+                            <button 
+                                [class]="mp.isFollowedByMe ? 'mini-profile-card__follow-btn following' : 'mini-profile-card__follow-btn'"
+                                (click)="toggleMiniProfileFollow($event)">
+                                {{ mp.isFollowedByMe ? 'Following' : 'Follow' }}
+                            </button>
+                        }
+                    } @else {
+                        @if (!isCurrentUser(rant.username)) {
+                            <button class="mini-profile-card__follow-btn" (click)="toggleMiniProfileFollow($event)">
+                                Follow
+                            </button>
+                        }
+                    }
+                </div>
+                <div class="mini-profile-card__details">
+                    <span class="mini-profile-card__display-name" (click)="onProfileClick($event)">{{ rant.displayName
+                        }}</span>
+                    <span class="mini-profile-card__username">@{{ rant.username }}</span>
+                </div>
+                <div class="mini-profile-card__stats">
+                    <span class="mini-profile-card__stat">
+                        <span class="mini-profile-card__stat-val">{{ miniProfile() ? miniProfile()!.followingCount : '...' }}</span>
+                        <span class="mini-profile-card__stat-lbl">Following</span>
+                    </span>
+                    <span class="mini-profile-card__stat">
+                        <span class="mini-profile-card__stat-val">{{ miniProfile() ? miniProfile()!.followerCount : '...' }}</span>
+                        <span class="mini-profile-card__stat-lbl">Followers</span>
+                    </span>
+                </div>
+            </div>
         </div>
         <div class="rant-card__user-info">
-            <span class="rant-card__display-name">{{ rant.displayName }}</span>
-            <span class="rant-card__username">@{{ rant.username }}</span>
+            <div class="rant-card__profile-trigger mini-profile-trigger" (mouseenter)="loadMiniProfile()">
+                <span class="rant-card__display-name" (click)="onProfileClick($event)">{{ rant.displayName }}</span>
+                <span class="rant-card__username">@{{ rant.username }}</span>
+                <!-- Mini Profile Card -->
+                <div class="mini-profile-card" (click)="$event.stopPropagation()">
+                    <div class="mini-profile-card__header">
+                        <div class="mini-profile-card__avatar" [style.background]="rant.profileImageUrl ? 'transparent' : getAvatarColor()"
+                            (click)="onProfileClick($event)">
+                            @if (rant.profileImageUrl) {
+                                <img [src]="rant.profileImageUrl" alt="Avatar" class="rant-card__avatar-img" />
+                            } @else {
+                                {{ avatarInitials }}
+                            }
+                        </div>
+                        @if (miniProfile(); as mp) {
+                            @if (!isCurrentUser(mp.username)) {
+                                <button 
+                                    [class]="mp.isFollowedByMe ? 'mini-profile-card__follow-btn following' : 'mini-profile-card__follow-btn'"
+                                    (click)="toggleMiniProfileFollow($event)">
+                                    {{ mp.isFollowedByMe ? 'Following' : 'Follow' }}
+                                </button>
+                            }
+                        } @else {
+                            @if (!isCurrentUser(rant.username)) {
+                                <button class="mini-profile-card__follow-btn" (click)="toggleMiniProfileFollow($event)">
+                                    Follow
+                                </button>
+                            }
+                        }
+                    </div>
+                    <div class="mini-profile-card__details">
+                        <span class="mini-profile-card__display-name" (click)="onProfileClick($event)">{{
+                            rant.displayName }}</span>
+                        <span class="mini-profile-card__username">@{{ rant.username }}</span>
+                    </div>
+                    <div class="mini-profile-card__stats">
+                        <span class="mini-profile-card__stat">
+                            <span class="mini-profile-card__stat-val">{{ miniProfile() ? miniProfile()!.followingCount : '...' }}</span>
+                            <span class="mini-profile-card__stat-lbl">Following</span>
+                        </span>
+                        <span class="mini-profile-card__stat">
+                            <span class="mini-profile-card__stat-val">{{ miniProfile() ? miniProfile()!.followerCount : '...' }}</span>
+                            <span class="mini-profile-card__stat-lbl">Followers</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
             <span class="rant-card__dot">·</span>
             <span class="rant-card__timestamp">{{ formatDate(rant.createdAt) }}</span>
         </div>
@@ -28,13 +122,25 @@
 
     <!-- Content -->
     <div class="rant-card__body">
-        <p class="rant-card__content">{{ rant.content }}</p>
+        <p class="rant-card__content">
+            @for (segment of parseContentSegments(rant.content); track segment.text) {
+                @if (segment.isHashtag) {
+                    <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+                } @else {
+                    <span>{{ segment.text }}</span>
+                }
+            }
+        </p>
 
         <!-- Quote Rant (quoted re-rant with commentary) -->
         <div class="rant-card__quote" *ngIf="rant.quoteRant" (click)="onQuoteClick($event)">
             <div class="rant-card__quote-header">
-                <div class="rant-card__quote-avatar" [style.background]="getAvatarColor(rant.quoteRant.username)">
-                    {{ getQuoteAvatarInitials(rant.quoteRant.displayName || rant.quoteRant.username) }}
+                <div class="rant-card__quote-avatar" [style.background]="rant.quoteRant.profileImageUrl ? 'transparent' : getAvatarColor(rant.quoteRant.username)">
+                    @if (rant.quoteRant.profileImageUrl) {
+                        <img [src]="rant.quoteRant.profileImageUrl" alt="Avatar" class="rant-card__avatar-img" />
+                    } @else {
+                        {{ getQuoteAvatarInitials(rant.quoteRant.displayName || rant.quoteRant.username) }}
+                    }
                 </div>
                 <div class="rant-card__quote-user-info">
                     <span class="rant-card__quote-name">{{ rant.quoteRant.displayName || rant.quoteRant.username
@@ -46,7 +152,15 @@
                     </time>
                 </div>
             </div>
-            <p class="rant-card__quote-content">{{ rant.quoteRant.content }}</p>
+            <p class="rant-card__quote-content">
+                @for (segment of parseContentSegments(rant.quoteRant.content); track segment.text) {
+                    @if (segment.isHashtag) {
+                        <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+                    } @else {
+                        <span>{{ segment.text }}</span>
+                    }
+                }
+            </p>
 
             <!-- Quote rant media - click opens media modal -->
             @if (rant.quoteRant.mediaUrl) {

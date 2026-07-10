@@ -1,7 +1,11 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Rant } from '../../models/rant.model';
 import { VideoPlayerComponent } from '../video-player/video-player.component';
+import { AUTH_CONTEXT } from '../../contexts/auth.context';
+import { UserService } from '../../services/user.service';
+import { UserProfile } from '../../models/user.model';
 
 @Component({
     selector: 'app-rant-card',
@@ -16,9 +20,17 @@ import { VideoPlayerComponent } from '../video-player/video-player.component';
 })
 
 export class RantCardComponent {
+    private readonly router = inject(Router);
+    private readonly authCtx = inject(AUTH_CONTEXT);
+    private readonly userService = inject(UserService);
+
     @Input({ required: true }) rant!: Rant;
     /** When true, action buttons (like/rerant/bookmark) are visible but disabled. */
     @Input() readonly = false;
+
+    // Mini profile fetching state
+    readonly miniProfile = signal<UserProfile | null>(null);
+    readonly isMiniProfileLoading = signal(false);
 
     /** Emitted when the like button is clicked. */
     @Output() likeClick = new EventEmitter<string>();
@@ -77,6 +89,26 @@ export class RantCardComponent {
             .join('')
             .toUpperCase()
             .slice(0, 2);
+    }
+
+    parseContentSegments(content: string): { text: string; isHashtag: boolean }[] {
+        if (!content) return [];
+        const segments: { text: string; isHashtag: boolean }[] = [];
+        const regex = /(#[a-zA-Z0-9_]+)/g;
+        const parts = content.split(regex);
+        for (const part of parts) {
+            if (part.startsWith('#')) {
+                segments.push({ text: part, isHashtag: true });
+            } else if (part) {
+                segments.push({ text: part, isHashtag: false });
+            }
+        }
+        return segments;
+    }
+
+    onHashtagClick(event: Event, tag: string) {
+        event.stopPropagation();
+        this.router.navigate(['/explore/search'], { queryParams: { q: tag } });
     }
 
     /** Whether the media image for this rant has finished loading. */
@@ -147,5 +179,58 @@ export class RantCardComponent {
     onQuoteMediaClick(event: MouseEvent): void {
         event.stopPropagation();
         this.quoteMediaClick.emit(this.rant.quoteRantId);
+    }
+    onProfileClick(event: Event): void {
+        event.stopPropagation();
+        if (this.rant?.username) {
+            this.router.navigate(['/profile', this.rant.username]);
+        }
+    }
+
+    loadMiniProfile(): void {
+        if (!this.rant || this.miniProfile() || this.isMiniProfileLoading()) return;
+
+        this.isMiniProfileLoading.set(true);
+        this.userService.getUserProfile(this.rant.username).subscribe({
+            next: (profile) => {
+                this.miniProfile.set(profile);
+                this.isMiniProfileLoading.set(false);
+            },
+            error: () => {
+                this.isMiniProfileLoading.set(false);
+            }
+        });
+    }
+
+    isCurrentUser(username: string): boolean {
+        const currentUser = this.authCtx.derived.isAuthenticated() ? this.authCtx.state().currentUser : null;
+        return currentUser ? currentUser.username.toLowerCase() === username.toLowerCase() : false;
+    }
+
+    toggleMiniProfileFollow(event: Event): void {
+        event.stopPropagation();
+        const profile = this.miniProfile();
+        if (!profile) return;
+
+        const previousState = profile.isFollowedByMe;
+        const previousCount = profile.followerCount;
+
+        // Optimistic update
+        this.miniProfile.set({
+            ...profile,
+            isFollowedByMe: !previousState,
+            followerCount: previousCount + (previousState ? -1 : 1)
+        });
+
+        this.userService.toggleFollow(profile.username).subscribe({
+            error: () => {
+                // Rollback
+                this.miniProfile.set({
+                    ...profile,
+                    isFollowedByMe: previousState,
+                    followerCount: previousCount
+                });
+            }
+        });
     }
 }

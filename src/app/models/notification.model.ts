@@ -12,4 +12,6 @@ export interface Notification {
   isRead: boolean;
   /** The rant content this notification relates to (optional). */
   relatedRantContent?: string;
+  rantId?: string;
+  sourceProfileImageUrl?: string;
 }
