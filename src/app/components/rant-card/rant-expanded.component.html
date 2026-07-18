@@ -4,6 +4,7 @@
   @if (threadHistory().length > 0) {
   <div class="rant-expanded__ancestors">
     @for (ancestor of threadHistory(); track ancestor.id; let idx = $index) {
+    @let parsed = ancestor.content | parseContent;
     <div class="rant-expanded__ancestor-item" (click)="navigateToAncestor(ancestor, idx)">
       <div class="rant-expanded__ancestor-left">
         @if (ancestor.profileImageUrl) {
@@ -24,7 +25,34 @@
             {{ formatDate(ancestor.createdAt) }}
           </time>
         </div>
-        <p class="rant-expanded__ancestor-content">{{ ancestor.content }}</p>
+        <p class="rant-expanded__ancestor-content">
+          @for (segment of parsed.segments; track $index) {
+            @if (segment.type === 'hashtag') {
+              <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+            } @else if (segment.type === 'mention') {
+              <a class="rant-card__mention" (click)="onMentionClick($event, segment.text)">{{ segment.text }}</a>
+            } @else if (segment.type === 'link') {
+              <a class="rant-card__link" [href]="segment.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ segment.text }}</a>
+            } @else {
+              <span>{{ segment.text }}</span>
+            }
+          }
+        </p>
+
+        <!-- Extracted Media Links for Ancestor -->
+        @if (parsed.mediaLinks.length > 0) {
+        <div class="rant-card__extracted-media" style="margin-bottom: 0.5rem;">
+          @for (link of parsed.mediaLinks; track link.url) {
+          <div class="rant-card__extracted-media-item" (click)="$event.stopPropagation()">
+            @if (link.type === 'video') {
+            <app-video-player [src]="link.url"></app-video-player>
+            } @else {
+            <img [src]="link.url" alt="Embedded" class="rant-card__extracted-image" (click)="onEmbeddedMediaClick($event, link.url)" />
+            }
+          </div>
+          }
+        </div>
+        }
       </div>
     </div>
     }
@@ -33,6 +61,7 @@
 
   <!-- Currently Focused Item (Rant or Reply) -->
   @if (focusedItem(); as focused) {
+  @let parsed = focused.content | parseContent;
   <article class="rant-expanded__rant">
     <div class="rant-expanded__header">
       @if (focused.profileImageUrl) {
@@ -61,11 +90,39 @@
     }
 
     <div class="rant-expanded__body">
-      <p class="rant-expanded__content">{{ focused.content }}</p>
+      <p class="rant-expanded__content">
+        @for (segment of parsed.segments; track $index) {
+          @if (segment.type === 'hashtag') {
+            <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+          } @else if (segment.type === 'mention') {
+            <a class="rant-card__mention" (click)="onMentionClick($event, segment.text)">{{ segment.text }}</a>
+          } @else if (segment.type === 'link') {
+            <a class="rant-card__link" [href]="segment.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ segment.text }}</a>
+          } @else {
+            <span>{{ segment.text }}</span>
+          }
+        }
+      </p>
+
+      <!-- Extracted Media Links for Focused Post -->
+      @if (parsed.mediaLinks.length > 0) {
+      <div class="rant-card__extracted-media" style="margin-bottom: 0.75rem;">
+        @for (link of parsed.mediaLinks; track link.url) {
+        <div class="rant-card__extracted-media-item" (click)="$event.stopPropagation()">
+          @if (link.type === 'video') {
+          <app-video-player [src]="link.url"></app-video-player>
+          } @else {
+          <img [src]="link.url" alt="Embedded" class="rant-card__extracted-image" (click)="onEmbeddedMediaClick($event, link.url)" />
+          }
+        </div>
+        }
+      </div>
+      }
 
       <!-- Quote Rant (Only if it's a Rant, not Reply) -->
       @if (asRant(focused); as rantObj) {
       @if (rantObj.quoteRant) {
+      @let quoteParsed = rantObj.quoteRant.content | parseContent;
       <div class="rant-expanded__quote" (click)="onQuoteClick($event)">
         <div class="rant-expanded__quote-header">
           <div class="rant-expanded__quote-avatar" [style.background]="getAvatarColor(rantObj.quoteRant.username)">
@@ -80,7 +137,35 @@
             </time>
           </div>
         </div>
-        <p class="rant-expanded__quote-content">{{ rantObj.quoteRant.content }}</p>
+        <p class="rant-expanded__quote-content">
+          @for (segment of quoteParsed.segments; track $index) {
+            @if (segment.type === 'hashtag') {
+              <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+            } @else if (segment.type === 'mention') {
+              <a class="rant-card__mention" (click)="onMentionClick($event, segment.text)">{{ segment.text }}</a>
+            } @else if (segment.type === 'link') {
+              <a class="rant-card__link" [href]="segment.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ segment.text }}</a>
+            } @else {
+              <span>{{ segment.text }}</span>
+            }
+          }
+        </p>
+
+        <!-- Extracted Quote Media Links -->
+        @if (quoteParsed.mediaLinks.length > 0) {
+        <div class="rant-card__quote-extracted-media" style="margin-bottom: 0.5rem;">
+          @for (link of quoteParsed.mediaLinks; track link.url) {
+          <div class="rant-card__quote-extracted-media-item" (click)="$event.stopPropagation()">
+            @if (link.type === 'video') {
+            <app-video-player [src]="link.url"></app-video-player>
+            } @else {
+            <img [src]="link.url" alt="Quoted Embedded" class="rant-card__quote-extracted-image" (click)="onEmbeddedMediaClick($event, link.url)" />
+            }
+          </div>
+          }
+        </div>
+        }
+
         @if (rantObj.quoteRant.mediaUrl) {
         <div class="rant-expanded__quote-media" (click)="onQuoteMediaClick($event)">
           @if (rantObj.quoteRant.mediaType === 'image') {
@@ -252,6 +337,7 @@
     } @else {
     <ul class="rant-expanded__replies-list" role="list">
       @for (reply of replies(); track reply.id) {
+      @let parsedReply = reply.content | parseContent;
       <li class="rant-expanded__reply-item">
         <!-- Reply Item (click to drill down/view thread) -->
         <div class="rant-expanded__reply" (click)="onReplyClick(reply, $event)">
@@ -277,7 +363,34 @@
               </time>
             </div>
           </div>
-          <p class="rant-expanded__reply-content">{{ reply.content }}</p>
+          <p class="rant-expanded__reply-content">
+            @for (segment of parsedReply.segments; track $index) {
+              @if (segment.type === 'hashtag') {
+                <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+              } @else if (segment.type === 'mention') {
+                <a class="rant-card__mention" (click)="onMentionClick($event, segment.text)">{{ segment.text }}</a>
+              } @else if (segment.type === 'link') {
+                <a class="rant-card__link" [href]="segment.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ segment.text }}</a>
+              } @else {
+                <span>{{ segment.text }}</span>
+              }
+            }
+          </p>
+
+          <!-- Extracted Media Links for Reply -->
+          @if (parsedReply.mediaLinks.length > 0) {
+          <div class="rant-card__extracted-media" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+            @for (link of parsedReply.mediaLinks; track link.url) {
+            <div class="rant-card__extracted-media-item" (click)="$event.stopPropagation()">
+              @if (link.type === 'video') {
+              <app-video-player [src]="link.url"></app-video-player>
+              } @else {
+              <img [src]="link.url" alt="Embedded" class="rant-card__extracted-image" (click)="onEmbeddedMediaClick($event, link.url)" />
+              }
+            </div>
+            }
+          </div>
+          }
 
           @if (reply.mediaUrl) {
           <div class="rant-expanded__reply-media-container">
@@ -342,6 +455,7 @@
           </div>
           } @else {
           @for (child of getChildReplies(reply.id); track child.id; let isLastChild = $last) {
+          @let parsedChild = child.content | parseContent;
           <div class="rant-expanded__reply rant-expanded__reply--child" (click)="onReplyClick(child, $event)">
             <!-- Child reply thread line -->
             <div class="rant-expanded__thread-line" [class.rant-expanded__thread-line--last]="isLastChild"></div>
@@ -374,7 +488,34 @@
             </div>
             }
 
-            <p class="rant-expanded__reply-content">{{ child.content }}</p>
+            <p class="rant-expanded__reply-content">
+              @for (segment of parsedChild.segments; track $index) {
+                @if (segment.type === 'hashtag') {
+                  <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+                } @else if (segment.type === 'mention') {
+                  <a class="rant-card__mention" (click)="onMentionClick($event, segment.text)">{{ segment.text }}</a>
+                } @else if (segment.type === 'link') {
+                  <a class="rant-card__link" [href]="segment.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ segment.text }}</a>
+                } @else {
+                  <span>{{ segment.text }}</span>
+                }
+              }
+            </p>
+
+            <!-- Extracted Media Links for Child Reply -->
+            @if (parsedChild.mediaLinks.length > 0) {
+            <div class="rant-card__extracted-media" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+              @for (link of parsedChild.mediaLinks; track link.url) {
+              <div class="rant-card__extracted-media-item" (click)="$event.stopPropagation()">
+                @if (link.type === 'video') {
+                <app-video-player [src]="link.url"></app-video-player>
+                } @else {
+                <img [src]="link.url" alt="Embedded" class="rant-card__extracted-image" (click)="onEmbeddedMediaClick($event, link.url)" />
+                }
+              </div>
+              }
+            </div>
+            }
 
             @if (child.mediaUrl) {
             <div class="rant-expanded__reply-media-container">

@@ -8,12 +8,12 @@ import { RightPanel } from '../../components/right-panel/right-panel.component';
   standalone: true,
   imports: [RouterOutlet, SidebarComponent, RightPanel],
   template: `
-    <div class="app-shell" [class.is-messages]="isMessagesPage()">
+    <div class="app-shell" [class.is-messages]="isMessagesPage()" [class.is-wide]="isWideLayoutPage()">
       <app-sidebar />
       <main class="main-content">
         <router-outlet />
       </main>
-      @if (!isMessagesPage()) {
+      @if (!isWideLayoutPage()) {
         <aside class="right-panel-wrapper">
           <app-right-panel />
         </aside>
@@ -51,7 +51,8 @@ import { RightPanel } from '../../components/right-panel/right-panel.component';
       transition: all 0.2s ease;
     }
 
-    .app-shell.is-messages .main-content {
+    .app-shell.is-messages .main-content,
+    .app-shell.is-wide .main-content {
       flex: 0 0 950px;
       max-width: 950px;
       width: 950px;
@@ -120,5 +121,9 @@ export class MainLayoutComponent {
 
   isMessagesPage(): boolean {
     return this.router.url.includes('/messages');
+  }
+
+  isWideLayoutPage(): boolean {
+    return this.router.url.includes('/messages') || this.router.url.includes('/games');
   }
 }

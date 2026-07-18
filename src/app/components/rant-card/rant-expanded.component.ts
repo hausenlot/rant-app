@@ -1,16 +1,18 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subject, takeUntil, take } from 'rxjs';
 import { Rant, Reply, MediaType } from '../../models/rant.model';
 import { RantService } from '../../services/rant.service';
 import { VideoPlayerComponent } from '../video-player/video-player.component';
 import { AUTH_CONTEXT } from '../../contexts/auth.context';
 import { FEED_CONTEXT } from '../../contexts/feed.context';
+import { ParseContentPipe } from '../../pipes/parse-content.pipe';
 
 @Component({
   selector: 'app-rant-expanded',
   standalone: true,
-  imports: [CommonModule, VideoPlayerComponent],
+  imports: [CommonModule, VideoPlayerComponent, ParseContentPipe],
   templateUrl: './rant-expanded.component.html',
   styleUrl: './rant-expanded.component.css',
   host: {
@@ -21,6 +23,7 @@ export class RantExpandedComponent implements OnInit, OnDestroy {
   private readonly rantService = inject(RantService);
   private readonly authCtx = inject(AUTH_CONTEXT);
   private readonly feedCtx = inject(FEED_CONTEXT, { optional: true });
+  private readonly router = inject(Router);
   private readonly destroy$ = new Subject<void>();
 
   private _rant!: Rant;
@@ -557,5 +560,21 @@ export class RantExpandedComponent implements OnInit, OnDestroy {
   formatCount(count: number): string {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
     return String(count);
+  }
+
+  onHashtagClick(event: Event, tag: string): void {
+    event.stopPropagation();
+    this.router.navigate(['/explore/search'], { queryParams: { q: tag } });
+  }
+
+  onMentionClick(event: Event, mention: string): void {
+    event.stopPropagation();
+    const username = mention.replace(/^@/, '');
+    this.router.navigate(['/profile', username]);
+  }
+
+  onEmbeddedMediaClick(event: Event, url: string): void {
+    event.stopPropagation();
+    window.open(url, '_blank');
   }
 }

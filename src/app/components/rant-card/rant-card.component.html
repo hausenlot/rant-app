@@ -123,14 +123,33 @@
     <!-- Content -->
     <div class="rant-card__body">
         <p class="rant-card__content">
-            @for (segment of parseContentSegments(rant.content); track segment.text) {
-                @if (segment.isHashtag) {
+            @for (segment of parsedContent.segments; track $index) {
+                @if (segment.type === 'hashtag') {
                     <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+                } @else if (segment.type === 'mention') {
+                    <a class="rant-card__mention" (click)="onMentionClick($event, segment.text)">{{ segment.text }}</a>
+                } @else if (segment.type === 'link') {
+                    <a class="rant-card__link" [href]="segment.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ segment.text }}</a>
                 } @else {
                     <span>{{ segment.text }}</span>
                 }
             }
         </p>
+
+        <!-- Extracted Media Links -->
+        @if (parsedContent.mediaLinks.length > 0) {
+        <div class="rant-card__extracted-media">
+            @for (link of parsedContent.mediaLinks; track link.url) {
+            <div class="rant-card__extracted-media-item" (click)="$event.stopPropagation()">
+                @if (link.type === 'video') {
+                <app-video-player [src]="link.url"></app-video-player>
+                } @else {
+                <img [src]="link.url" alt="Embedded" class="rant-card__extracted-image" (click)="onEmbeddedMediaClick($event, link.url)" />
+                }
+            </div>
+            }
+        </div>
+        }
 
         <!-- Quote Rant (quoted re-rant with commentary) -->
         <div class="rant-card__quote" *ngIf="rant.quoteRant" (click)="onQuoteClick($event)">
@@ -153,14 +172,33 @@
                 </div>
             </div>
             <p class="rant-card__quote-content">
-                @for (segment of parseContentSegments(rant.quoteRant.content); track segment.text) {
-                    @if (segment.isHashtag) {
+                @for (segment of parsedQuoteContent?.segments; track $index) {
+                    @if (segment.type === 'hashtag') {
                         <a class="rant-card__hashtag" (click)="onHashtagClick($event, segment.text)">{{ segment.text }}</a>
+                    } @else if (segment.type === 'mention') {
+                        <a class="rant-card__mention" (click)="onMentionClick($event, segment.text)">{{ segment.text }}</a>
+                    } @else if (segment.type === 'link') {
+                        <a class="rant-card__link" [href]="segment.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()">{{ segment.text }}</a>
                     } @else {
                         <span>{{ segment.text }}</span>
                     }
                 }
             </p>
+
+            <!-- Extracted Quote Media Links -->
+            @if (parsedQuoteContent && parsedQuoteContent.mediaLinks.length > 0) {
+            <div class="rant-card__quote-extracted-media">
+                @for (link of parsedQuoteContent.mediaLinks; track link.url) {
+                <div class="rant-card__quote-extracted-media-item" (click)="$event.stopPropagation()">
+                    @if (link.type === 'video') {
+                    <app-video-player [src]="link.url"></app-video-player>
+                    } @else {
+                    <img [src]="link.url" alt="Quoted Embedded" class="rant-card__quote-extracted-image" (click)="onEmbeddedMediaClick($event, link.url)" />
+                    }
+                </div>
+                }
+            </div>
+            }
 
             <!-- Quote rant media - click opens media modal -->
             @if (rant.quoteRant.mediaUrl) {

@@ -6,6 +6,7 @@ import { VideoPlayerComponent } from '../video-player/video-player.component';
 import { AUTH_CONTEXT } from '../../contexts/auth.context';
 import { UserService } from '../../services/user.service';
 import { UserProfile } from '../../models/user.model';
+import { parseContent, ParsedContent } from '../../utils/content-parser.utils';
 
 @Component({
     selector: 'app-rant-card',
@@ -24,7 +25,23 @@ export class RantCardComponent {
     private readonly authCtx = inject(AUTH_CONTEXT);
     private readonly userService = inject(UserService);
 
-    @Input({ required: true }) rant!: Rant;
+    private _rant!: Rant;
+    parsedContent!: ParsedContent;
+    parsedQuoteContent: ParsedContent | null = null;
+
+    @Input({ required: true }) set rant(value: Rant) {
+        this._rant = value;
+        this.parsedContent = parseContent(value.content);
+        if (value.quoteRant) {
+            this.parsedQuoteContent = parseContent(value.quoteRant.content);
+        } else {
+            this.parsedQuoteContent = null;
+        }
+    }
+    get rant(): Rant {
+        return this._rant;
+    }
+
     /** When true, action buttons (like/rerant/bookmark) are visible but disabled. */
     @Input() readonly = false;
 
@@ -109,6 +126,17 @@ export class RantCardComponent {
     onHashtagClick(event: Event, tag: string) {
         event.stopPropagation();
         this.router.navigate(['/explore/search'], { queryParams: { q: tag } });
+    }
+
+    onMentionClick(event: Event, mention: string) {
+        event.stopPropagation();
+        const username = mention.replace(/^@/, '');
+        this.router.navigate(['/profile', username]);
+    }
+
+    onEmbeddedMediaClick(event: Event, url: string) {
+        event.stopPropagation();
+        window.open(url, '_blank');
     }
 
     /** Whether the media image for this rant has finished loading. */
